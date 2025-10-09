@@ -11,7 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        Schema::create('cuisine_weights', function (Blueprint $table) {
+            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('cuisine_id')->constrained('cuisines');
+            $table->float('weight');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -19,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('cuisine_weights');
     }
 };
