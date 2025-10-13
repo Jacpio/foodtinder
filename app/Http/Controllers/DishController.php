@@ -53,5 +53,9 @@ use Illuminate\Http\Response;
         return response()->json([], 204);
     }
 
+    public function recommendation(Request $request): JsonResponse{
+        $data = $request->validate([]);
 
+        return response()->json([], 204);
+    }
 }
