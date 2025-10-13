@@ -8,3 +8,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/swipe-decision', [DishController::class, 'swipeDecision']);
     Route::get('/recommended-dishes', [DishController::class, 'recommendation']);
 });
+
+require __DIR__.'/auth.php';

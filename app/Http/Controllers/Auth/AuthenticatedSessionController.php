@@ -16,6 +16,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): JsonResponse
     {
+
         $request->authenticate();
 
         $token = $request->user()->createToken('api_token')->plainTextToken;
