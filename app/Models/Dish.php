@@ -40,6 +40,7 @@ class Dish extends Model
         'name',
         'category_id',
         'cuisine_id',
+        'flavour_id',
         'image_url',
         'description',
     ];

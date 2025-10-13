@@ -49,8 +49,8 @@ use Illuminate\Http\Response;
     }
 
     public function recommendation(Request $request): JsonResponse{
-        $data = $request->validate([]);
-
-        return response()->json([], 204);
+        $user = Auth::user();
+        $dish =  $this->dishService->recommendedDishes($user);
+        return response()->json($dish);
     }
 }
