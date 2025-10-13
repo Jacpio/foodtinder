@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
@@ -34,6 +35,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Dish extends Model
 {
+    protected $appends = ['image_url_full'];
     protected $fillable = [
         'name',
         'category_id',
@@ -45,6 +47,15 @@ class Dish extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function getImageUrlFullAttribute(): string
+    {
+        if (!$this->image_url) {
+            return asset('default.jpg');
+        }
+
+        return asset(  Storage::url( $this->image_url));
     }
 
     public function cuisine(): BelongsTo

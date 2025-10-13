@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use AllowDynamicProperties;
-use App\Models\CategoryWeight;
-use App\Models\CuisineWeight;
 use App\Models\Dish;
-use App\Models\FlavourWeight;
 use App\Service\DishService;
 use Auth;
 use Illuminate\Http\JsonResponse;
@@ -15,7 +12,6 @@ use Illuminate\Http\Response;
 
 #[AllowDynamicProperties] class DishController extends Controller
 {
-
     public function __construct(DishService $dishService)
     {
         $this->dishService = $dishService;
@@ -31,7 +27,6 @@ use Illuminate\Http\Response;
             ->inRandomOrder()
             ->take(5)
             ->get();
-
 
         return response()->json($dishes);
     }
