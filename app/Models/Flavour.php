@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -28,5 +30,8 @@ class Flavour extends Model
     public function weights(): HasMany
     {
         return $this->hasMany(FlavourWeight::class);
+    }
+    public function dishes(): hasMany{
+        return $this->hasMany(Dish::class);
     }
 }

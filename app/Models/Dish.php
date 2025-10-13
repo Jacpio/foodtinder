@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -48,5 +50,11 @@ class Dish extends Model
     public function cuisine(): BelongsTo
     {
         return $this->belongsTo(Cuisine::class);
+    }
+    public function swipes(): HasMany{
+        return $this->hasMany(Swipe::class);
+    }
+    public function flavour(): BelongsTo{
+        return $this->belongsTo(Flavour::class);
     }
 }

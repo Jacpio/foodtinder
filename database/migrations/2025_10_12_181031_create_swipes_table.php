@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('category_weights', function (Blueprint $table) {
-            $table->id();
+        Schema::create('swipes', function (Blueprint $table) {
+            $table->foreignId('dish_id')->constrained('dishes');
             $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('category_id')->constrained('categories');
-            $table->float('weight');
             $table->timestamps();
         });
     }
@@ -25,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('category_weights');
+        Schema::dropIfExists('swipes');
     }
 };
