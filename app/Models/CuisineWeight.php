@@ -6,17 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @property int $id
  * @property int $user_id
- * @property \App\Models\Cuisine|null $cuisine
+ * @property int $cuisine_id
  * @property float $weight
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Cuisine $cuisine
  * @property-read \App\Models\User $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CuisineWeight newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CuisineWeight newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CuisineWeight query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CuisineWeight whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CuisineWeight whereCuisine($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CuisineWeight whereCuisineId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CuisineWeight whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CuisineWeight whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CuisineWeight whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CuisineWeight whereWeight($value)

@@ -1,35 +1,54 @@
 <?php
 
 use App\Models\User;
+use Laravel\Sanctum\Sanctum;
 
-test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
+uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-    $response = $this->post('/login', [
+test('users can authenticate using the API', function () {
+    $user = User::factory()->create([
+        'password' => bcrypt('password'),
+    ]);
+
+    $response = $this->postJson('/api/login', [
         'email' => $user->email,
         'password' => 'password',
     ]);
 
-    $this->assertAuthenticated();
-    $response->assertNoContent();
+    $response->assertStatus(200)
+        ->assertJsonStructure([
+            'token',
+            'user'
+        ]);
 });
 
-test('users can not authenticate with invalid password', function () {
-    $user = User::factory()->create();
+test('users cannot authenticate with invalid password via API', function () {
+    $user = User::factory()->create([
+        'password' => bcrypt('password'),
+    ]);
 
-    $this->post('/login', [
+    $response = $this->postJson('/api/login', [
         'email' => $user->email,
         'password' => 'wrong-password',
     ]);
 
-    $this->assertGuest();
+    $response->assertStatus(422)
+        ->assertJsonFragment([
+            'message' => 'These credentials do not match our records.',
+        ]);
 });
 
-test('users can logout', function () {
+test('users can logout via API', function () {
     $user = User::factory()->create();
 
-    $response = $this->actingAs($user)->post('/logout');
+    Sanctum::actingAs($user, ['*']);
 
-    $this->assertGuest();
-    $response->assertNoContent();
+    $response = $this->postJson('/api/logout');
+
+    $response->assertStatus(200)
+        ->assertJson([
+            'message' => 'Successfully logged out',
+        ]);
+
+    $this->assertCount(0, $user->tokens);
 });

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @property int $id
  * @property int $user_id
  * @property int $flavour_id
  * @property float $weight
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static Builder<static>|FlavourWeight query()
  * @method static Builder<static>|FlavourWeight whereCreatedAt($value)
  * @method static Builder<static>|FlavourWeight whereFlavourId($value)
+ * @method static Builder<static>|FlavourWeight whereId($value)
  * @method static Builder<static>|FlavourWeight whereUpdatedAt($value)
  * @method static Builder<static>|FlavourWeight whereUserId($value)
  * @method static Builder<static>|FlavourWeight whereWeight($value)

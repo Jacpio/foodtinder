@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Service;
+namespace App\Services;
 
 use App\Models\CategoryWeight;
 use App\Models\CuisineWeight;
 use App\Models\Dish;
 use App\Models\FlavourWeight;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 
-class DishService
+class SwipeService
 {
     public function addWeightToCategory(int $categoryId, int $userId, string $decision): void
     {
@@ -70,32 +71,15 @@ class DishService
         }
     }
 
-    public function recommendedDishes(User $user)
+    public function getUnswipedDishes(?User $user, int $limit): Collection
     {
+        $swipedDishIds = $user->swipes()->pluck('dish_id');
+        $availableDishesCount = Dish::whereNotIn('id', $swipedDishIds)->count();
+        $limit = min($limit, $availableDishesCount);
         return Dish::with(['category', 'cuisine', 'flavour'])
-            ->get()
-            ->map(function ($dish) use ($user) {
-                $categoryWeight = CategoryWeight::where('user_id', $user->id)
-                    ->where('category_id', $dish->category_id)
-                    ->value('weight') ?? 0;
-
-                $cuisineWeight = CuisineWeight::where('user_id', $user->id)
-                    ->where('cuisine_id', $dish->cuisine_id)
-                    ->value('weight') ?? 0;
-
-                $flavourWeight = 0;
-                if ($dish->flavour) {
-                    $flavourWeight = FlavourWeight::where('user_id', $user->id)
-                        ->where('flavour_id', $dish->flavour->id)
-                        ->value('weight') ?? 0;
-                }
-
-                $dish->match_score = $categoryWeight + $cuisineWeight + $flavourWeight;
-
-                return $dish;
-            })
-            ->filter(fn($dish) => $dish->match_score > 0)
-            ->sortByDesc('match_score')
-            ->values();
+            ->whereNotIn('id', $swipedDishIds)
+            ->inRandomOrder()
+            ->take($limit)
+            ->get();
     }
 }

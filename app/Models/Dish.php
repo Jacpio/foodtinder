@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,12 +15,17 @@ use Illuminate\Support\Facades\Storage;
  * @property string $name
  * @property int $category_id
  * @property int $cuisine_id
+ * @property int $flavour_id
  * @property string|null $image_url
  * @property string|null $description
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Category $category
  * @property-read \App\Models\Cuisine $cuisine
+ * @property-read \App\Models\Flavour $flavour
+ * @property-read string $image_url_full
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Swipe> $swipes
+ * @property-read int|null $swipes_count
  * @method static Builder<static>|Dish newModelQuery()
  * @method static Builder<static>|Dish newQuery()
  * @method static Builder<static>|Dish query()
@@ -27,6 +33,7 @@ use Illuminate\Support\Facades\Storage;
  * @method static Builder<static>|Dish whereCreatedAt($value)
  * @method static Builder<static>|Dish whereCuisineId($value)
  * @method static Builder<static>|Dish whereDescription($value)
+ * @method static Builder<static>|Dish whereFlavourId($value)
  * @method static Builder<static>|Dish whereId($value)
  * @method static Builder<static>|Dish whereImageUrl($value)
  * @method static Builder<static>|Dish whereName($value)
@@ -35,6 +42,7 @@ use Illuminate\Support\Facades\Storage;
  */
 class Dish extends Model
 {
+    use HasFactory;
     protected $appends = ['image_url_full'];
     protected $fillable = [
         'name',

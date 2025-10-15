@@ -4,29 +4,28 @@ namespace App\Http\Controllers;
 
 use AllowDynamicProperties;
 use App\Models\Dish;
-use App\Service\DishService;
+use App\Services\SwipeService;
 use Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-#[AllowDynamicProperties] class DishController extends Controller
+#[AllowDynamicProperties] class SwipeController extends Controller
 {
-    public function __construct(DishService $dishService)
+    public function __construct(SwipeService $dishService)
     {
         $this->dishService = $dishService;
     }
 
-    public function swipeCards(): JsonResponse
+    public function swipeCards(Request $request): JsonResponse
     {
         $user = Auth::user();
+        $request->validate([
+                'limit' => 'nullable|int|min:1|max:10',
+            ]);
 
-        $swipedDishIds = $user->swipes()->pluck('dish_id');
-        $dishes = Dish::with(['category', 'cuisine', 'flavour'])
-            ->whereNotIn('id', $swipedDishIds)
-            ->inRandomOrder()
-            ->take(5)
-            ->get();
+        $limit = $validated['limit'] ?? 5;
+        $dishes = $this->dishService->getUnswipedDishes($user, $limit);
 
         return response()->json($dishes);
     }
@@ -45,12 +44,6 @@ use Illuminate\Http\Response;
         $this->dishService->addWeightToFlavour($dish->flavour_id, $userId, $data['decision']);
         $this->dishService->addWeightToCuisine($dish->cuisine_id, $userId, $data['decision']);
 
-        return response()->json([], 204);
-    }
-
-    public function recommendation(Request $request): JsonResponse{
-        $user = Auth::user();
-        $dish =  $this->dishService->recommendedDishes($user);
-        return response()->json($dish);
+        return response()->json([], 200);
     }
 }

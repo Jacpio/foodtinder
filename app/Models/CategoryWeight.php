@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @property int $id
  * @property int $user_id
  * @property int $category_id
  * @property float $weight
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CategoryWeight query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CategoryWeight whereCategoryId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CategoryWeight whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CategoryWeight whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CategoryWeight whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CategoryWeight whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CategoryWeight whereWeight($value)
