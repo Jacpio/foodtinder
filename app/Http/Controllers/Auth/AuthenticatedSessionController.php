@@ -8,11 +8,28 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use OpenApi\Annotations as OA;
 
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Handle an incoming authentication request.
+     * @OA\Post(
+     *   path="api/login",
+     *   summary="Logowanie",
+     *   tags={"Auth"},
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\JsonContent(
+     *      type="array",
+     *      @OA\Items(ref="#/components/schemas/LoginRequest")
+     * )
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="OK",
+     *     @OA\JsonContent(ref="#/components/schemas/AuthTokenResponse")
+     *   )
+     * )
      */
     public function store(LoginRequest $request): JsonResponse
     {
@@ -28,7 +45,14 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Destroy an authenticated session.
+     * @OA\Post(
+     *   path="api/logout",
+     *   tags={"Auth"},
+     *   summary="Wylogowanie (inwalidacja tokenu)",
+     *   security={{"bearerAuth": {}}},
+     *   @OA\Response(response=200, description="OK", @OA\JsonContent(ref="#/components/schemas/MessageResponse")),
+     *   @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function destroy(Request $request): JsonResponse
     {

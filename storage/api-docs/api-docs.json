@@ -1,0 +1,560 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "FoodTinder API",
+        "description": "API do logowania, swipe’ów i rekomendacji dań.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost",
+            "description": "Local"
+        }
+    ],
+    "paths": {
+        "api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logowanie",
+                "operationId": "0aabac24e722c84ecb25cbe844514866",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/LoginRequest"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthTokenResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Wylogowanie (inwalidacja tokenu)",
+                "operationId": "51c1fe6ecf4e5fb1424d17d9606d99a2",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "api/verify-email/{id}/{hash}": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Potwierdzenie adresu email (redirect)",
+                "operationId": "36da40610f39b3888902c5a1b2010396",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "hash",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect to frontend with verified=1"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/recommended-dishes": {
+            "get": {
+                "tags": [
+                    "Recommendations"
+                ],
+                "summary": "Recommendations for logged-in user",
+                "description": "Zwraca listę rekomendowanych dań dla aktualnego użytkownika.",
+                "operationId": "recommendation",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Maksymalna liczba pozycji",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 5,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DishWithScore"
+                                    }
+                                },
+                                "example": [
+                                    {
+                                        "id": 101,
+                                        "name": "Spaghetti Carbonara",
+                                        "category_id": 1,
+                                        "cuisine_id": 3,
+                                        "flavour_id": 5,
+                                        "image_url": "spaghetti.jpg",
+                                        "image_url_full": "http://localhost/storage/spaghetti.jpg",
+                                        "description": "Classic",
+                                        "match_score": 0.93
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/swipe-cards": {
+            "get": {
+                "tags": [
+                    "Swipes"
+                ],
+                "summary": "Pobierz karty do swipe’owania",
+                "operationId": "bc06d8eb51e2659b92e2f932a862e578",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 5,
+                            "maximum": 10,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Dish"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/swipe-decision": {
+            "post": {
+                "tags": [
+                    "Swipes"
+                ],
+                "summary": "Zapisz decyzję swipe (like/dislike)",
+                "operationId": "79222349d0339c05122302c69982cf4e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SwipeDecisionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": []
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Dish not found"
+                    },
+                    "422": {
+                        "description": "Błąd walidacji",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AuthUser": {
+                "required": [
+                    "id",
+                    "name",
+                    "email"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Jan Kowalski"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "jan@example.com"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "verification-link-sent"
+                    }
+                },
+                "type": "object"
+            },
+            "AuthTokenResponse": {
+                "required": [
+                    "token",
+                    "user"
+                ],
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "example": "1|abcdefgh..."
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/AuthUser"
+                    }
+                },
+                "type": "object"
+            },
+            "LoginRequest": {
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "jan@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "secret123"
+                    }
+                },
+                "type": "object"
+            },
+            "RegisterRequest": {
+                "required": [
+                    "name",
+                    "email",
+                    "password",
+                    "password_confirmation"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Jan Kowalski"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "jan@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "secret123"
+                    },
+                    "password_confirmation": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "secret123"
+                    }
+                },
+                "type": "object"
+            },
+            "EmailOnlyRequest": {
+                "required": [
+                    "email"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "jan@example.com"
+                    }
+                },
+                "type": "object"
+            },
+            "ResetPasswordRequest": {
+                "required": [
+                    "email",
+                    "token",
+                    "password",
+                    "password_confirmation"
+                ],
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "example": "reset-token"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "jan@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "newPass123"
+                    },
+                    "password_confirmation": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "newPass123"
+                    }
+                },
+                "type": "object"
+            },
+            "MessageResponse": {
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Successfully logged out"
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationError": {
+                "required": [
+                    "message",
+                    "errors"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "schema": "AuthSchemas",
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "example": "The email field is required."
+                            }
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "AuthSchemas": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "example": "The email field is required."
+                }
+            },
+            "Dish": {
+                "required": [
+                    "id",
+                    "name",
+                    "category_id",
+                    "cuisine_id",
+                    "flavour_id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Spaghetti Carbonara"
+                    },
+                    "category_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "cuisine_id": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "flavour_id": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "image_url": {
+                        "type": "string",
+                        "example": "spaghetti.jpg",
+                        "nullable": true
+                    },
+                    "image_url_full": {
+                        "type": "string",
+                        "example": "http://localhost/storage/spaghetti.jpg"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Classic Roman pasta.",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "DishWithScore": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Dish"
+                    },
+                    {
+                        "properties": {
+                            "match_score": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 0.93
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "SwipeDecisionRequest": {
+                "required": [
+                    "dish_id",
+                    "decision"
+                ],
+                "properties": {
+                    "dish_id": {
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "decision": {
+                        "type": "string",
+                        "enum": [
+                            "like",
+                            "dislike"
+                        ]
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "Token",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Recommendations",
+            "description": "Recommendations"
+        },
+        {
+            "name": "Swipes",
+            "description": "Swipes"
+        }
+    ]
+}

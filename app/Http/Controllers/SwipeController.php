@@ -9,6 +9,7 @@ use Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use OpenApi\Annotations as OA;
 
 #[AllowDynamicProperties] class SwipeController extends Controller
 {
@@ -16,6 +17,24 @@ use Illuminate\Http\Response;
     {
         $this->dishService = $dishService;
     }
+    /**
+     * @OA\Get(
+     *   path="/api/swipe-cards",
+     *   tags={"Swipes"},
+     *   summary="Pobierz karty do swipe’owania",
+     *   security={{"bearerAuth": {}}},
+     *   @OA\Parameter(
+     *     name="limit", in="query", required=false,
+     *     @OA\Schema(type="integer", minimum=1, maximum=10, default=5)
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="OK",
+     *     @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Dish"))
+     *   ),
+     *   @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
 
     public function swipeCards(Request $request): JsonResponse
     {
@@ -29,6 +48,26 @@ use Illuminate\Http\Response;
 
         return response()->json($dishes);
     }
+    /**
+     * @OA\Post(
+     *   path="/api/swipe-decision",
+     *   tags={"Swipes"},
+     *   summary="Zapisz decyzję swipe (like/dislike)",
+     *   security={{"bearerAuth": {}}},
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\JsonContent(ref="#/components/schemas/SwipeDecisionRequest")
+     *   ),
+     *   @OA\Response(response=200, description="OK", @OA\JsonContent(type="object", example={})),
+     *   @OA\Response(response=404, description="Dish not found"),
+     *   @OA\Response(
+     *     response=422,
+     *     description="Błąd walidacji",
+     *     @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *   ),
+     *   @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
     public function swipeDecision(Request $request): JsonResponse|Response
     {
         $data = $request->validate([

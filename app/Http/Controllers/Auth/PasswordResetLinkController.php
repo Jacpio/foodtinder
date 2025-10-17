@@ -7,9 +7,20 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
+use OpenApi\Annotations as OA;
 
 class PasswordResetLinkController extends Controller
 {
+    /**
+     * @OA\Post(
+     *   path="api/forgot-password",
+     *   tags={"Auth"},
+     *   summary="Wyślij link resetu hasła",
+     *   @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/EmailOnlyRequest")),
+     *   @OA\Response(response=200, description="OK", @OA\JsonContent(ref="#/components/schemas/StatusResponse")),
+     *   @OA\Response(response=422, description="Validation error", @OA\JsonContent(ref="#/components/schemas/ValidationError"))
+     * )
+     */
     /**
      * Handle an incoming password reset link request.
      *

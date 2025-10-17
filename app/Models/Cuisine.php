@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read int|null $dishes_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CategoryWeight> $weights
  * @property-read int|null $weights_count
+ * @method static \Database\Factories\CuisineFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Cuisine newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Cuisine newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Cuisine query()

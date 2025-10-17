@@ -11,9 +11,20 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
+use OpenApi\Annotations as OA;
 
 class NewPasswordController extends Controller
 {
+    /**
+     * @OA\Post(
+     *   path="api/reset-password",
+     *   tags={"Auth"},
+     *   summary="Ustaw nowe hasło",
+     *   @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/ResetPasswordRequest")),
+     *   @OA\Response(response=200, description="OK", @OA\JsonContent(ref="#/components/schemas/StatusResponse")),
+     *   @OA.Response(response=422, description="Validation error", @OA\JsonContent(ref="#/components/schemas/ValidationError"))
+     * )
+     */
     /**
      * Handle an incoming new password request.
      *

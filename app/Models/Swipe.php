@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $user_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Dish $dish
+ * @property-read \App\Models\User $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Swipe newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Swipe newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Swipe query()

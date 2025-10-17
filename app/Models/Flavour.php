@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read int|null $dishes_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FlavourWeight> $weights
  * @property-read int|null $weights_count
+ * @method static \Database\Factories\FlavourFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Flavour newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Flavour newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Flavour query()

@@ -9,9 +9,20 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use OpenApi\Annotations as OA;
 
 class RegisteredUserController extends Controller
 {
+    /**
+     * @OA\Post(
+     *   path="api/register",
+     *   tags={"Auth"},
+     *   summary="Rejestracja użytkownika",
+     *   @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/RegisterRequest")),
+     *   @OA\Response(response=201, description="Created", @OA\JsonContent(ref="#/components/schemas/AuthTokenResponse")),
+     *   @OA\Response(response=422, description="Validation error", @OA\JsonContent(ref="#/components/schemas/ValidationError"))
+     * )
+     */
     /**
      * Handle an incoming registration request.
      *

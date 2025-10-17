@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Storage;
  * @property-read string $image_url_full
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Swipe> $swipes
  * @property-read int|null $swipes_count
+ * @method static \Database\Factories\DishFactory factory($count = null, $state = [])
  * @method static Builder<static>|Dish newModelQuery()
  * @method static Builder<static>|Dish newQuery()
  * @method static Builder<static>|Dish query()
