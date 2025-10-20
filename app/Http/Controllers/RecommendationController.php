@@ -6,6 +6,7 @@ use AllowDynamicProperties;
 use App\Services\RecommendationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 use OpenApi\Annotations as OA;
 
 #[AllowDynamicProperties] class RecommendationController extends Controller
@@ -26,7 +27,7 @@ use OpenApi\Annotations as OA;
      *   @OA\Parameter(
      *     name="limit", in="query", required=false,
      *     description="Maksymalna liczba pozycji",
-     *     @OA\Schema(type="integer", minimum=1, maximum=100, default=5)
+     *     @OA\Schema(type="integer", minimum=1, maximum=20, default="")
      *   ),
      *   @OA\Response(
      *     response=200,
@@ -43,9 +44,13 @@ use OpenApi\Annotations as OA;
      * )
      */
 
-    public function recommendation(): JsonResponse{
+    public function recommendation(Request $request): JsonResponse{
+        $data = $request->validate([
+            'limit' => 'nullable|integer|min:1',
+        ]);
         $user = Auth::user();
-        $dish =  $this->recommendationService->recommendedDishes($user);
-        return response()->json($dish);
+        $limit = $data['limit'] ?? null;
+        $dishes = $this->recommendationService->recommendedDishes($user, $limit);
+        return response()->json($dishes);
     }
 }

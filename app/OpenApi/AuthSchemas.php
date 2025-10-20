@@ -11,7 +11,8 @@ use OpenApi\Annotations as OA;
  *   required={"id","name","email"},
  *   @OA\Property(property="id", type="integer", example=7),
  *   @OA\Property(property="name", type="string", example="Jan Kowalski"),
- *   @OA\Property(property="email", type="string", format="email", example="jan@example.com")
+ *   @OA\Property(property="email", type="string", format="email", example="jan@example.com"),
+ *   @OA\Property(property="email_verified_at", type="string", format="date-time", example="2025-10-17T19:52:15.000000Z")
  * )
  *
  * @OA\Schema(
@@ -79,7 +80,7 @@ use OpenApi\Annotations as OA;
  *     type="object",
  *     additionalProperties=@OA\Schema(
  *       type="array",
- *       @OA\Items(type="string", example="The email field is required.")
+ *       @OA\Items(type="string", example="The field is required.")
  *     )
  *   )
  * )

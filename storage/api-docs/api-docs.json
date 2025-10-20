@@ -2,12 +2,12 @@
     "openapi": "3.0.0",
     "info": {
         "title": "FoodTinder API",
-        "description": "API do logowania, swipe’ów i rekomendacji dań.",
+        "description": "API do logowania, swipe’ów i rekomendacji dań. Po prostu Tinder dla jedzenia!",
         "version": "1.0.0"
     },
     "servers": [
         {
-            "url": "http://localhost",
+            "url": "http://localhost:8000",
             "description": "Local"
         }
     ],
@@ -42,6 +42,16 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -51,7 +61,7 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Wylogowanie (inwalidacja tokenu)",
+                "summary": "Wylogowanie",
                 "operationId": "51c1fe6ecf4e5fb1424d17d9606d99a2",
                 "responses": {
                     "200": {
@@ -80,7 +90,7 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Potwierdzenie adresu email (redirect)",
+                "summary": "Potwierdzenie adresu email",
                 "operationId": "36da40610f39b3888902c5a1b2010396",
                 "parameters": [
                     {
@@ -102,10 +112,323 @@
                 ],
                 "responses": {
                     "302": {
-                        "description": "Redirect to frontend with verified=1"
+                        "description": "Email already verified"
+                    },
+                    "200": {
+                        "description": "Email successfully verified"
                     },
                     "401": {
                         "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dishes": {
+            "get": {
+                "tags": [
+                    "Dishes"
+                ],
+                "summary": "Lista potraw",
+                "operationId": "ddf841d9ba35d917bd22a504c13b2f72",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Dish"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Dishes"
+                ],
+                "summary": "Utwórz nową potrawę",
+                "operationId": "4055da700195ec26e05d953ac8fe8a0a",
+                "requestBody": {
+                    "description": "Użyj multipart/form-data, obrazek jest opcjonalny",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "category_id",
+                                    "cuisine_id",
+                                    "flavour_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Pizza Margherita"
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "cuisine_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "flavour_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Klasyk",
+                                        "nullable": true
+                                    },
+                                    "image": {
+                                        "description": "Obrazek (opcjonalnie). Zapisujesz w root dysku 'public'.",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Utworzono",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Dish"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dishes/{id}": {
+            "get": {
+                "tags": [
+                    "Dishes"
+                ],
+                "summary": "Pokaż jedną potrawę",
+                "operationId": "07b6fe7c8dc79b35e66b58956b97b893",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Dish"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Dishes"
+                ],
+                "summary": "Zaktualizuj potrawę",
+                "operationId": "52b7975eeaea935e1251d215f5ac6bb4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Wspiera JSON lub multipart/form-data. W JSON obrazka nie wyślesz.",
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "category_id": {
+                                        "type": "integer"
+                                    },
+                                    "cuisine_id": {
+                                        "type": "integer"
+                                    },
+                                    "flavour_id": {
+                                        "type": "integer"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "remove_image": {
+                                        "description": "Ustaw true, by usunąć istniejący obrazek",
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "category_id": {
+                                        "type": "integer"
+                                    },
+                                    "cuisine_id": {
+                                        "type": "integer"
+                                    },
+                                    "flavour_id": {
+                                        "type": "integer"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "remove_image": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Dish"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Dishes"
+                ],
+                "summary": "Usuń potrawę",
+                "operationId": "57bb2309cba8e67241d5d84d8ceb6beb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -120,7 +443,7 @@
                 "tags": [
                     "Recommendations"
                 ],
-                "summary": "Recommendations for logged-in user",
+                "summary": "Rekomendacje dla użytkowników",
                 "description": "Zwraca listę rekomendowanych dań dla aktualnego użytkownika.",
                 "operationId": "recommendation",
                 "parameters": [
@@ -131,8 +454,8 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "default": 5,
-                            "maximum": 100,
+                            "default": "",
+                            "maximum": 20,
                             "minimum": 1
                         }
                     }
@@ -296,6 +619,11 @@
                         "format": "email",
                         "example": "jan@example.com"
                     },
+                    "email_verified_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-10-17T19:52:15.000000Z"
+                    },
                     "status": {
                         "type": "string",
                         "example": "verification-link-sent"
@@ -437,7 +765,7 @@
                             "type": "array",
                             "items": {
                                 "type": "string",
-                                "example": "The email field is required."
+                                "example": "The field is required."
                             }
                         }
                     }
@@ -448,7 +776,7 @@
                 "type": "array",
                 "items": {
                     "type": "string",
-                    "example": "The email field is required."
+                    "example": "The field is required."
                 }
             },
             "Dish": {
@@ -514,6 +842,15 @@
                     }
                 ]
             },
+            "ErrorResponse": {
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    }
+                },
+                "type": "object"
+            },
             "SwipeDecisionRequest": {
                 "required": [
                     "dish_id",
@@ -547,6 +884,10 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Dishes",
+            "description": "Dishes"
         },
         {
             "name": "Recommendations",

@@ -28,15 +28,19 @@ class AuthenticatedSessionController extends Controller
      *     response=200,
      *     description="OK",
      *     @OA\JsonContent(ref="#/components/schemas/AuthTokenResponse")
-     *   )
+     *   ),
+     *   @OA\Response(
+     *     response=422,
+     *     description="Validation Error",
+     *     @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *    )
      * )
      */
     public function store(LoginRequest $request): JsonResponse
     {
+        $user = $request->authenticate();
 
-        $request->authenticate();
-
-        $token = $request->user()->createToken('api_token')->plainTextToken;
+        $token = $user->createToken('api-token', ['*'])->plainTextToken;
 
         return response()->json([
             'token' => $token,
@@ -48,7 +52,7 @@ class AuthenticatedSessionController extends Controller
      * @OA\Post(
      *   path="api/logout",
      *   tags={"Auth"},
-     *   summary="Wylogowanie (inwalidacja tokenu)",
+     *   summary="Wylogowanie",
      *   security={{"bearerAuth": {}}},
      *   @OA\Response(response=200, description="OK", @OA\JsonContent(ref="#/components/schemas/MessageResponse")),
      *   @OA\Response(response=401, description="Unauthenticated")

@@ -11,3 +11,4 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/admin_api.php';

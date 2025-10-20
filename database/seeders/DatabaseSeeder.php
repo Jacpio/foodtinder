@@ -12,6 +12,7 @@ use App\Models\FlavourWeight;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,12 +22,15 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
-
+        $admin = Role::firstOrCreate(['name' => 'admin',  'guard_name' => 'api']);
+        Role::firstOrCreate(['name' => 'user', 'guard_name' => 'api']);
         $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => bcrypt('password'),
         ]);
+
+        $user->assignRole($admin);
 
         $categories = [
             'Zupy',

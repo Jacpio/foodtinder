@@ -10,9 +10,9 @@ use App\Models\User;
 
 class RecommendationService
 {
-    public function recommendedDishes(User $user)
+    public function recommendedDishes(User $user, ?int $limit = null)
     {
-        return Dish::with(['category', 'cuisine', 'flavour'])
+        $collection = Dish::with(['category', 'cuisine', 'flavour'])
             ->get()
             ->map(function ($dish) use ($user) {
                 $categoryWeight = CategoryWeight::where('user_id', $user->id)
@@ -37,5 +37,6 @@ class RecommendationService
             ->filter(fn($dish) => $dish->match_score > 0)
             ->sortByDesc('match_score')
             ->values();
+        return $limit ? $collection->take($limit)->values() : $collection;
     }
 }

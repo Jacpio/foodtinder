@@ -29,7 +29,13 @@ use OpenApi\Annotations as OA;
  *     )
  *   }
  * )
- *
+ * @OA\Schema(
+ *      schema="ErrorResponse",
+ *      type="object",
+ *      properties={
+ *          @OA\Property(property="message", type="string", example="The given data was invalid.")
+ *      }
+ * )
  * @OA\Schema(
  *   schema="SwipeDecisionRequest",
  *   type="object",
