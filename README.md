@@ -2,7 +2,7 @@ Utwórz bazę danych o nazwie: foodtinder
 
 ```console
 $ composer install
-$ php artisan migrate:fresh
+$ php artisan migrate:fresh --seed
 $ php artisan serve
 $ php artisan storage:link
 ```
