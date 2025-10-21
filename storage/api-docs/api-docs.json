@@ -12,13 +12,13 @@
         }
     ],
     "paths": {
-        "api/login": {
+        "/api/login": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Logowanie",
-                "operationId": "0aabac24e722c84ecb25cbe844514866",
+                "operationId": "bc76a9d52929cab7a147ca7b5c527430",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -56,13 +56,13 @@
                 }
             }
         },
-        "api/logout": {
+        "/api/logout": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Wylogowanie",
-                "operationId": "51c1fe6ecf4e5fb1424d17d9606d99a2",
+                "operationId": "0ab4e3cf7bc4f7ec81b48f7928c7de7c",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -133,23 +133,109 @@
                 "tags": [
                     "Dishes"
                 ],
-                "summary": "Lista potraw",
+                "summary": "Lista potraw (z parametrami)",
                 "operationId": "ddf841d9ba35d917bd22a504c13b2f72",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Paginacja (1–100, domyślnie 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "OK (paginacja Laravel: data + meta + links)",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/Dish"
-                                    }
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Spaghetti Bolognese"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "image_url": {
+                                                        "type": "string",
+                                                        "example": "spaghetti.jpg",
+                                                        "nullable": true
+                                                    },
+                                                    "parameters": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 12
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "Włoska"
+                                                                },
+                                                                "type": {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "category",
+                                                                        "cuisine",
+                                                                        "flavour",
+                                                                        "other"
+                                                                    ],
+                                                                    "example": "cuisine"
+                                                                },
+                                                                "value": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 1
+                                                                },
+                                                                "is_active": {
+                                                                    "type": "boolean",
+                                                                    "example": true
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -158,41 +244,61 @@
                 "summary": "Utwórz nową potrawę",
                 "operationId": "4055da700195ec26e05d953ac8fe8a0a",
                 "requestBody": {
-                    "description": "Użyj multipart/form-data, obrazek jest opcjonalny",
+                    "description": "Wspiera JSON oraz multipart/form-data. Dołącz `parameter_ids[]` aby przypiąć parametry.",
                     "required": true,
                     "content": {
-                        "multipart/form-data": {
+                        "application/json": {
                             "schema": {
                                 "required": [
-                                    "name",
-                                    "category_id",
-                                    "cuisine_id",
-                                    "flavour_id"
+                                    "name"
                                 ],
                                 "properties": {
                                     "name": {
                                         "type": "string",
                                         "example": "Pizza Margherita"
                                     },
-                                    "category_id": {
-                                        "type": "integer",
-                                        "example": 1
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Klasyk",
+                                        "nullable": true
                                     },
-                                    "cuisine_id": {
-                                        "type": "integer",
-                                        "example": 2
-                                    },
-                                    "flavour_id": {
-                                        "type": "integer",
-                                        "example": 3
+                                    "parameter_ids": {
+                                        "description": "ID parametrów do przypięcia (category/cuisine/flavour/other)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Pizza Margherita"
                                     },
                                     "description": {
                                         "type": "string",
                                         "example": "Klasyk",
                                         "nullable": true
                                     },
+                                    "parameter_ids[]": {
+                                        "description": "ID parametrów do przypięcia",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    },
                                     "image": {
-                                        "description": "Obrazek (opcjonalnie). Zapisujesz w root dysku 'public'.",
+                                        "description": "Obrazek (opcjonalnie). Zapis w dysku 'public'.",
                                         "type": "string",
                                         "format": "binary",
                                         "nullable": true
@@ -209,7 +315,48 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Dish"
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 101
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Pizza Margherita"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "image_url": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "parameters": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "category",
+                                                            "cuisine",
+                                                            "flavour",
+                                                            "other"
+                                                        ]
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -218,14 +365,7 @@
                         "description": "Unauthenticated"
                     },
                     "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -240,7 +380,7 @@
                 "tags": [
                     "Dishes"
                 ],
-                "summary": "Pokaż jedną potrawę",
+                "summary": "Pokaż jedną potrawę (z parametrami)",
                 "operationId": "07b6fe7c8dc79b35e66b58956b97b893",
                 "parameters": [
                     {
@@ -258,7 +398,69 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Dish"
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Spaghetti Bolognese"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "image_url": {
+                                            "type": "string",
+                                            "example": "spaghetti.jpg",
+                                            "nullable": true
+                                        },
+                                        "parameters": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 12
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Włoska"
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "category",
+                                                            "cuisine",
+                                                            "flavour",
+                                                            "other"
+                                                        ],
+                                                        "example": "cuisine"
+                                                    },
+                                                    "value": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 1
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -266,7 +468,12 @@
                     "404": {
                         "description": "Not Found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -285,7 +492,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Wspiera JSON lub multipart/form-data. W JSON obrazka nie wyślesz.",
+                    "description": "Wspiera JSON oraz multipart/form-data. Użyj `parameter_ids` aby podmienić przypięte parametry.",
                     "required": false,
                     "content": {
                         "application/json": {
@@ -294,23 +501,20 @@
                                     "name": {
                                         "type": "string"
                                     },
-                                    "category_id": {
-                                        "type": "integer"
-                                    },
-                                    "cuisine_id": {
-                                        "type": "integer"
-                                    },
-                                    "flavour_id": {
-                                        "type": "integer"
-                                    },
                                     "description": {
                                         "type": "string",
                                         "nullable": true
                                     },
                                     "remove_image": {
-                                        "description": "Ustaw true, by usunąć istniejący obrazek",
                                         "type": "boolean",
                                         "example": false
+                                    },
+                                    "parameter_ids": {
+                                        "description": "Zestaw parametrów do zsynchronizowania (nadpisuje poprzednie)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -322,15 +526,6 @@
                                     "name": {
                                         "type": "string"
                                     },
-                                    "category_id": {
-                                        "type": "integer"
-                                    },
-                                    "cuisine_id": {
-                                        "type": "integer"
-                                    },
-                                    "flavour_id": {
-                                        "type": "integer"
-                                    },
                                     "description": {
                                         "type": "string",
                                         "nullable": true
@@ -338,6 +533,13 @@
                                     "remove_image": {
                                         "type": "boolean",
                                         "example": false
+                                    },
+                                    "parameter_ids[]": {
+                                        "description": "Zestaw parametrów do zsynchronizowania (nadpisuje poprzednie)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
                                     },
                                     "image": {
                                         "type": "string",
@@ -352,14 +554,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Dish"
-                                }
-                            }
-                        }
+                        "description": "OK"
                     },
                     "401": {
                         "description": "Unauthenticated"
@@ -368,14 +563,7 @@
                         "description": "Not Found"
                     },
                     "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -421,14 +609,7 @@
                         "description": "Unauthenticated"
                     },
                     "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -541,7 +722,8 @@
                 "tags": [
                     "Swipes"
                 ],
-                "summary": "Pobierz karty do swipe’owania (nieswipe’owane dania z parametrami)",
+                "summary": "Pobierz karty do swipe’owania (nieswipe’owane dania z przypiętymi parametrami)",
+                "description": "Zwraca losową listę nieswipe’owanych dań aktualnego użytkownika wraz z ich parametrami (category/cuisine/flavour/other).",
                 "operationId": "bc06d8eb51e2659b92e2f932a862e578",
                 "parameters": [
                     {
@@ -576,6 +758,7 @@
                                             },
                                             "description": {
                                                 "type": "string",
+                                                "example": "Klasyczny makaron z sosem pomidorowo-mięsnym.",
                                                 "nullable": true
                                             },
                                             "image_url": {
@@ -584,6 +767,7 @@
                                                 "nullable": true
                                             },
                                             "parameters": {
+                                                "description": "Parametry przypięte do dania (wiele↔wiele).",
                                                 "type": "array",
                                                 "items": {
                                                     "properties": {
@@ -593,11 +777,17 @@
                                                         },
                                                         "name": {
                                                             "type": "string",
-                                                            "example": "cuisine:Włoska"
+                                                            "example": "Włoska"
                                                         },
                                                         "type": {
                                                             "type": "string",
-                                                            "example": "enum"
+                                                            "enum": [
+                                                                "category",
+                                                                "cuisine",
+                                                                "flavour",
+                                                                "other"
+                                                            ],
+                                                            "example": "cuisine"
                                                         },
                                                         "value": {
                                                             "type": "number",
@@ -614,11 +804,13 @@
                                             },
                                             "created_at": {
                                                 "type": "string",
-                                                "format": "date-time"
+                                                "format": "date-time",
+                                                "example": "2025-10-08T12:34:56Z"
                                             },
                                             "updated_at": {
                                                 "type": "string",
-                                                "format": "date-time"
+                                                "format": "date-time",
+                                                "example": "2025-10-08T12:34:56Z"
                                             }
                                         },
                                         "type": "object"
@@ -644,6 +836,7 @@
                     "Swipes"
                 ],
                 "summary": "Zapisz decyzję swipe (like/dislike) i zaktualizuj wagi parametrów",
+                "description": "Aktualizuje wagi użytkownika (ParameterWeight) dla wszystkich parametrów przypiętych do dania. Dodatkowo zapisuje swipe (pivot swipes).",
                 "operationId": "79222349d0339c05122302c69982cf4e",
                 "requestBody": {
                     "required": true,
@@ -691,7 +884,20 @@
                         }
                     },
                     "404": {
-                        "description": "Dish not found"
+                        "description": "Nie znaleziono dania",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Dish not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
                         "description": "Błąd walidacji",

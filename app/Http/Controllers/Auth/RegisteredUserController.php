@@ -15,7 +15,7 @@ class RegisteredUserController extends Controller
 {
     /**
      * @OA\Post(
-     *   path="api/register",
+     *   path="/api/register",
      *   tags={"Auth"},
      *   summary="Rejestracja użytkownika",
      *   @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/RegisterRequest")),

@@ -6,20 +6,18 @@ use App\Models\Dish;
 use App\Services\SwipeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use OpenApi\Annotations as OA;
 
 class SwipeController extends Controller
 {
-    public function __construct(private SwipeService $swipeService)
-    {
-    }
+    public function __construct(private readonly SwipeService $swipeService){}
 
     /**
      * @OA\Get(
      *   path="/api/swipe-cards",
      *   tags={"Swipes"},
-     *   summary="Pobierz karty do swipe’owania (nieswipe’owane dania z parametrami)",
+     *   summary="Pobierz karty do swipe’owania (nieswipe’owane dania z przypiętymi parametrami)",
+     *   description="Zwraca losową listę nieswipe’owanych dań aktualnego użytkownika wraz z ich parametrami (category/cuisine/flavour/other).",
      *   security={{"bearerAuth": {}}},
      *   @OA\Parameter(
      *     name="limit", in="query", required=false,
@@ -35,22 +33,23 @@ class SwipeController extends Controller
      *         type="object",
      *         @OA\Property(property="id", type="integer", example=1),
      *         @OA\Property(property="name", type="string", example="Spaghetti Bolognese"),
-     *         @OA\Property(property="description", type="string", nullable=true),
+     *         @OA\Property(property="description", type="string", nullable=true, example="Klasyczny makaron z sosem pomidorowo-mięsnym."),
      *         @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
      *         @OA\Property(
      *           property="parameters",
      *           type="array",
+     *           description="Parametry przypięte do dania (wiele↔wiele).",
      *           @OA\Items(
      *             type="object",
      *             @OA\Property(property="id", type="integer", example=12),
-     *             @OA\Property(property="name", type="string", example="cuisine:Włoska"),
-     *             @OA\Property(property="type", type="string", example="enum"),
+     *             @OA\Property(property="name", type="string", example="Włoska"),
+     *             @OA\Property(property="type", type="string", enum={"category","cuisine","flavour","other"}, example="cuisine"),
      *             @OA\Property(property="value", type="number", format="float", example=1),
      *             @OA\Property(property="is_active", type="boolean", example=true)
      *           )
      *         ),
-     *         @OA\Property(property="created_at", type="string", format="date-time"),
-     *         @OA\Property(property="updated_at", type="string", format="date-time")
+     *         @OA\Property(property="created_at", type="string", format="date-time", example="2025-10-08T12:34:56Z"),
+     *         @OA\Property(property="updated_at", type="string", format="date-time", example="2025-10-08T12:34:56Z")
      *       )
      *     )
      *   ),
@@ -76,6 +75,7 @@ class SwipeController extends Controller
      *   path="/api/swipe-decision",
      *   tags={"Swipes"},
      *   summary="Zapisz decyzję swipe (like/dislike) i zaktualizuj wagi parametrów",
+     *   description="Aktualizuje wagi użytkownika (ParameterWeight) dla wszystkich parametrów przypiętych do dania. Dodatkowo zapisuje swipe (pivot swipes).",
      *   security={{"bearerAuth": {}}},
      *   @OA\RequestBody(
      *     required=true,
@@ -88,9 +88,17 @@ class SwipeController extends Controller
      *   @OA\Response(
      *     response=200,
      *     description="Zapisano",
-     *     @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="success"))
+     *     @OA\JsonContent(type="object",
+     *       @OA\Property(property="message", type="string", example="success")
+     *     )
      *   ),
-     *   @OA\Response(response=404, description="Dish not found"),
+     *   @OA\Response(
+     *     response=404,
+     *     description="Nie znaleziono dania",
+     *     @OA\JsonContent(type="object",
+     *       @OA\Property(property="message", type="string", example="Dish not found")
+     *     )
+     *   ),
      *   @OA\Response(
      *     response=422,
      *     description="Błąd walidacji",
