@@ -13,10 +13,7 @@ return new class extends Migration
     {
         Schema::create('dishes', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->foreignId('category_id')->constrained('categories');
-            $table->foreignId('cuisine_id')->constrained('cuisines');
-            $table->foreignId('flavour_id')->constrained('flavours');
+            $table->string('name')->unique();
             $table->string('image_url')->nullable();
             $table->string('description')->nullable();
             $table->timestamps();

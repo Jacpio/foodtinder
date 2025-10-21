@@ -23,9 +23,6 @@ class DishFactory extends Factory
             'name' => $this->faker->words(2, true),
             'description' => $this->faker->sentence(),
             'image_url' => $this->faker->uuid() . '.jpg',
-            'category_id' => Category::factory(),
-            'cuisine_id' => Cuisine::factory(),
-            'flavour_id' => Flavour::factory(),
         ];
     }
 }

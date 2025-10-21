@@ -13,13 +13,12 @@ return new class extends Migration
     {
         Schema::create('parameters', function (Blueprint $table) {
             $table->id();
-            $table->string('key')->unique();
             $table->string('name');
-            $table->enum('type', ['int','float','bool','string','enum'])->default('float');
-            $table->float('weight')->default(1);
-            $table->json('meta')->nullable();
+            $table->enum('type', ['cuisine','flavour','category','other'])->default('other');
+            $table->float('value')->unsigned()->default(1);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->unique(['name']);
         });
     }
 

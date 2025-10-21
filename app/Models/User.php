@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -19,14 +20,12 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CategoryWeight> $categoryWeights
- * @property-read int|null $category_weights_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CuisineWeight> $cuisineWeights
- * @property-read int|null $cuisine_weights_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FlavourWeight> $flavourWeights
- * @property-read int|null $flavour_weights_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Dish> $likedDishes
+ * @property-read int|null $liked_dishes_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ParameterWeight> $parameterWeights
+ * @property-read int|null $parameter_weights_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
  * @property-read int|null $permissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
@@ -94,18 +93,16 @@ class User extends Authenticatable
         ];
     }
 
-    public function categoryWeights(): HasMany
-    {
-        return $this->hasMany(CategoryWeight::class);
-    }
-    public function cuisineWeights(): HasMany{
-        return $this->hasMany(CuisineWeight::class);
-    }
-    public function flavourWeights(): HasMany
-    {
-        return $this->hasMany(FlavourWeight::class);
-    }
     public function swipes(): HasMany{
         return $this->hasMany(Swipe::class);
+    }
+    public function likedDishes(): BelongsToMany
+    {
+        return $this->belongsToMany(Dish::class, 'swipes')
+            ->withTimestamps();
+    }
+    public function parameterWeights(): HasMany
+    {
+        return $this->hasMany(ParameterWeight::class);
     }
 }

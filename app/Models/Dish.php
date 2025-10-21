@@ -13,28 +13,21 @@ use Illuminate\Support\Facades\Storage;
 /**
  * @property int $id
  * @property string $name
- * @property int $category_id
- * @property int $cuisine_id
- * @property int $flavour_id
  * @property string|null $image_url
  * @property string|null $description
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Category $category
- * @property-read \App\Models\Cuisine $cuisine
- * @property-read \App\Models\Flavour $flavour
  * @property-read string $image_url_full
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Swipe> $swipes
- * @property-read int|null $swipes_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $likedByUsers
+ * @property-read int|null $liked_by_users_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Parameter> $parameters
+ * @property-read int|null $parameters_count
  * @method static \Database\Factories\DishFactory factory($count = null, $state = [])
  * @method static Builder<static>|Dish newModelQuery()
  * @method static Builder<static>|Dish newQuery()
  * @method static Builder<static>|Dish query()
- * @method static Builder<static>|Dish whereCategoryId($value)
  * @method static Builder<static>|Dish whereCreatedAt($value)
- * @method static Builder<static>|Dish whereCuisineId($value)
  * @method static Builder<static>|Dish whereDescription($value)
- * @method static Builder<static>|Dish whereFlavourId($value)
  * @method static Builder<static>|Dish whereId($value)
  * @method static Builder<static>|Dish whereImageUrl($value)
  * @method static Builder<static>|Dish whereName($value)
@@ -47,16 +40,13 @@ class Dish extends Model
     protected $appends = ['image_url_full'];
     protected $fillable = [
         'name',
-        'category_id',
-        'cuisine_id',
-        'flavour_id',
         'image_url',
         'description',
     ];
 
-    public function category(): BelongsTo
+    public function parameters(): BelongsToMany
     {
-        return $this->belongsTo(Category::class);
+        return $this->BelongsToMany(Parameter::class, 'dish_parameters')->withTimestamps();
     }
 
     public function getImageUrlFullAttribute(): string
@@ -67,15 +57,9 @@ class Dish extends Model
 
         return asset(  Storage::url( $this->image_url));
     }
-
-    public function cuisine(): BelongsTo
+    public function likedByUsers(): BelongsToMany
     {
-        return $this->belongsTo(Cuisine::class);
-    }
-    public function swipes(): HasMany{
-        return $this->hasMany(Swipe::class);
-    }
-    public function flavour(): BelongsTo{
-        return $this->belongsTo(Flavour::class);
+        return $this->belongsToMany(User::class, 'swipes')
+            ->withTimestamps();
     }
 }

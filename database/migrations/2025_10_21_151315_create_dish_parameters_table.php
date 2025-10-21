@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('category_weights', function (Blueprint $table) {
+        Schema::create('dish_parameters', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('category_id')->constrained('categories');
-            $table->float('weight');
+            $table->foreignId('dish_id')->constrained('dishes')->cascadeOnDelete();
+            $table->foreignId('parameter_id')->constrained('parameters')->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('category_weights');
+        Schema::dropIfExists('dish_parameters');
     }
 };

@@ -2,84 +2,62 @@
 
 namespace App\Services;
 
-use App\Models\CategoryWeight;
-use App\Models\CuisineWeight;
 use App\Models\Dish;
-use App\Models\FlavourWeight;
+use App\Models\ParameterWeight;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 class SwipeService
 {
-    public function addWeightToCategory(int $categoryId, int $userId, string $decision): void
+    /**
+     *
+     * @param  'like'|'dislike'  $decision
+     */
+    public function swipe(User $user, Dish $dish, string $decision): void
     {
-        $categoryWeight = CategoryWeight::firstOrCreate(
-            [
-                'user_id' => $userId,
-                'category_id' => $categoryId
-            ],
-            [
-                'weight' => 0
-            ]
-        );
-        if (!$categoryWeight->wasRecentlyCreated) {
-            if ($decision === 'like') {
-                $categoryWeight->increment('weight');
-            }elseif ($decision === 'dislike') {
-                $categoryWeight->decrement('weight');
-            }
+        $decision = strtolower($decision);
+        if (!in_array($decision, ['like', 'dislike'], true)) {
+            throw new InvalidArgumentException('decision must be "like" or "dislike"');
         }
+
+        DB::transaction(function () use ($user, $dish, $decision) {
+            $user->likedDishes()->syncWithoutDetaching([$dish->id]);
+
+            $parameterIds = $dish->parameters()->pluck('parameters.id');
+
+            foreach ($parameterIds as $pid) {
+                $pw = ParameterWeight::firstOrNew([
+                    'user_id'      => $user->id,
+                    'parameter_id' => $pid,
+                ]);
+
+                $current = (float) ($pw->weight ?? 0.0);
+                $delta   = $decision === 'like' ? 1.0 : -1.0;
+
+                $pw->weight = $this->clamp($current + $delta, 0.0, 20.0);
+                $pw->save();
+            }
+        });
     }
 
-    public function addWeightToFlavour(int $flavourId, int $userId, string $decision): void
+    public function getUnswipedDishes(User $user, int $limit): Collection
     {
-        $flavourWeight = FlavourWeight::firstOrCreate(
-            [
-                'user_id' => $userId,
-                'flavour_id' => $flavourId
-            ],
-            [
-                'weight' => 0
-            ]
-        );
-        if (!$flavourWeight->wasRecentlyCreated){
-            if ($decision === 'like') {
-                $flavourWeight->increment('weight');
-            }else if ($decision === 'dislike') {
-                $flavourWeight->decrement('weight');
-            }
-        }
-    }
+        $swipedDishIds = $user->likedDishes()->pluck('dishes.id');
 
-    public function addWeightToCuisine(int $cuisineId, int $userId, string $decision): void
-    {
-        $cuisineWeight = CuisineWeight::firstOrCreate(
-            [
-                'user_id' => $userId,
-                'cuisine_id' => $cuisineId
-            ],
-            [
-                'weight' => 0
-            ]
-        );
-        if (!$cuisineWeight->wasRecentlyCreated){
-            if ($decision === 'like'){
-                $cuisineWeight->increment('weight');
-            }else if ($decision === 'dislike'){
-                $cuisineWeight->decrement('weight');
-            }
-        }
-    }
+        $available = Dish::whereNotIn('id', $swipedDishIds)->count();
+        $limit = max(0, min($limit, $available));
 
-    public function getUnswipedDishes(?User $user, int $limit): Collection
-    {
-        $swipedDishIds = $user->swipes()->pluck('dish_id');
-        $availableDishesCount = Dish::whereNotIn('id', $swipedDishIds)->count();
-        $limit = min($limit, $availableDishesCount);
-        return Dish::with(['category', 'cuisine', 'flavour'])
+        return Dish::with('parameters')
             ->whereNotIn('id', $swipedDishIds)
             ->inRandomOrder()
             ->take($limit)
             ->get();
+    }
+
+    private function clamp(float $v, float $min, float $max): float
+    {
+        return max($min, min($max, $v));
     }
 }

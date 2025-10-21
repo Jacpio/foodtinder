@@ -2,87 +2,127 @@
 
 namespace App\Http\Controllers;
 
-use AllowDynamicProperties;
 use App\Models\Dish;
 use App\Services\SwipeService;
-use Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use OpenApi\Annotations as OA;
 
-#[AllowDynamicProperties] class SwipeController extends Controller
+class SwipeController extends Controller
 {
-    public function __construct(SwipeService $dishService)
+    public function __construct(private SwipeService $swipeService)
     {
-        $this->dishService = $dishService;
     }
+
     /**
      * @OA\Get(
      *   path="/api/swipe-cards",
      *   tags={"Swipes"},
-     *   summary="Pobierz karty do swipe’owania",
+     *   summary="Pobierz karty do swipe’owania (nieswipe’owane dania z parametrami)",
      *   security={{"bearerAuth": {}}},
      *   @OA\Parameter(
      *     name="limit", in="query", required=false,
+     *     description="Ile kart zwrócić (1–10, domyślnie 5)",
      *     @OA\Schema(type="integer", minimum=1, maximum=10, default=5)
      *   ),
      *   @OA\Response(
      *     response=200,
-     *     description="OK",
-     *     @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Dish"))
+     *     description="Lista dań",
+     *     @OA\JsonContent(
+     *       type="array",
+     *       @OA\Items(
+     *         type="object",
+     *         @OA\Property(property="id", type="integer", example=1),
+     *         @OA\Property(property="name", type="string", example="Spaghetti Bolognese"),
+     *         @OA\Property(property="description", type="string", nullable=true),
+     *         @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
+     *         @OA\Property(
+     *           property="parameters",
+     *           type="array",
+     *           @OA\Items(
+     *             type="object",
+     *             @OA\Property(property="id", type="integer", example=12),
+     *             @OA\Property(property="name", type="string", example="cuisine:Włoska"),
+     *             @OA\Property(property="type", type="string", example="enum"),
+     *             @OA\Property(property="value", type="number", format="float", example=1),
+     *             @OA\Property(property="is_active", type="boolean", example=true)
+     *           )
+     *         ),
+     *         @OA\Property(property="created_at", type="string", format="date-time"),
+     *         @OA\Property(property="updated_at", type="string", format="date-time")
+     *       )
+     *     )
      *   ),
      *   @OA\Response(response=401, description="Unauthenticated")
      * )
      */
-
     public function swipeCards(Request $request): JsonResponse
     {
-        $user = Auth::user();
-        $request->validate([
-                'limit' => 'nullable|int|min:1|max:10',
-            ]);
+        $validated = $request->validate([
+            'limit' => 'sometimes|integer|min:1|max:10',
+        ]);
 
+        $user = $request->user();
         $limit = $validated['limit'] ?? 5;
-        $dishes = $this->dishService->getUnswipedDishes($user, $limit);
+
+        $dishes = $this->swipeService->getUnswipedDishes($user, $limit);
 
         return response()->json($dishes);
     }
+
     /**
      * @OA\Post(
      *   path="/api/swipe-decision",
      *   tags={"Swipes"},
-     *   summary="Zapisz decyzję swipe (like/dislike)",
+     *   summary="Zapisz decyzję swipe (like/dislike) i zaktualizuj wagi parametrów",
      *   security={{"bearerAuth": {}}},
      *   @OA\RequestBody(
      *     required=true,
-     *     @OA\JsonContent(ref="#/components/schemas/SwipeDecisionRequest")
+     *     @OA\JsonContent(
+     *       required={"dish_id","decision"},
+     *       @OA\Property(property="dish_id", type="integer", example=1),
+     *       @OA\Property(property="decision", type="string", enum={"like","dislike"}, example="like")
+     *     )
      *   ),
-     *   @OA\Response(response=200, description="OK", @OA\JsonContent(type="object", example={})),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Zapisano",
+     *     @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="success"))
+     *   ),
      *   @OA\Response(response=404, description="Dish not found"),
      *   @OA\Response(
      *     response=422,
      *     description="Błąd walidacji",
-     *     @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *     @OA\JsonContent(
+     *       type="object",
+     *       @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *       @OA\Property(
+     *         property="errors",
+     *         type="object",
+     *         example={"dish_id":{"The selected dish id is invalid."}}
+     *       )
+     *     )
      *   ),
      *   @OA\Response(response=401, description="Unauthenticated")
      * )
      */
-    public function swipeDecision(Request $request): JsonResponse|Response
+    public function swipeDecision(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'dish_id' => 'required|integer|exists:dishes,id',
-            'decision' => 'required|in:like,dislike'
+            'dish_id'  => 'required|integer|exists:dishes,id',
+            'decision' => 'required|string|in:like,dislike',
         ]);
+
+        $user = $request->user();
+
         $dish = Dish::find($data['dish_id']);
-        if (!$dish){
+        if (!$dish) {
             return response()->json(['message' => 'Dish not found'], 404);
         }
-        $userId = Auth::id();
-        $this->dishService->addWeightToCategory($dish->category_id, $userId, $data['decision']);
-        $this->dishService->addWeightToFlavour($dish->flavour_id, $userId, $data['decision']);
-        $this->dishService->addWeightToCuisine($dish->cuisine_id, $userId, $data['decision']);
 
-        return response()->json([], 200);
+        $this->swipeService->swipe($user, $dish, $data['decision']);
+
+        return response()->json(['message' => 'success'], 200);
     }
 }

@@ -454,7 +454,7 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "default": "",
+                            "default": 10,
                             "maximum": 20,
                             "minimum": 1
                         }
@@ -468,22 +468,60 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/DishWithScore"
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 101
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Spaghetti Carbonara"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "example": "Classic",
+                                                "nullable": true
+                                            },
+                                            "image_url": {
+                                                "type": "string",
+                                                "example": "spaghetti.jpg",
+                                                "nullable": true
+                                            },
+                                            "parameters": {
+                                                "type": "array",
+                                                "items": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Włoska"
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                                "category",
+                                                                "cuisine",
+                                                                "flavour",
+                                                                "other"
+                                                            ],
+                                                            "example": "cuisine"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "match_score": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 3
+                                            }
+                                        },
+                                        "type": "object"
                                     }
-                                },
-                                "example": [
-                                    {
-                                        "id": 101,
-                                        "name": "Spaghetti Carbonara",
-                                        "category_id": 1,
-                                        "cuisine_id": 3,
-                                        "flavour_id": 5,
-                                        "image_url": "spaghetti.jpg",
-                                        "image_url_full": "http://localhost/storage/spaghetti.jpg",
-                                        "description": "Classic",
-                                        "match_score": 0.93
-                                    }
-                                ]
+                                }
                             }
                         }
                     },
@@ -503,12 +541,13 @@
                 "tags": [
                     "Swipes"
                 ],
-                "summary": "Pobierz karty do swipe’owania",
+                "summary": "Pobierz karty do swipe’owania (nieswipe’owane dania z parametrami)",
                 "operationId": "bc06d8eb51e2659b92e2f932a862e578",
                 "parameters": [
                     {
                         "name": "limit",
                         "in": "query",
+                        "description": "Ile kart zwrócić (1–10, domyślnie 5)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -520,13 +559,69 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Lista dań",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/Dish"
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Spaghetti Bolognese"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "nullable": true
+                                            },
+                                            "image_url": {
+                                                "type": "string",
+                                                "example": "spaghetti.jpg",
+                                                "nullable": true
+                                            },
+                                            "parameters": {
+                                                "type": "array",
+                                                "items": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 12
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "cuisine:Włoska"
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "example": "enum"
+                                                        },
+                                                        "value": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 1
+                                                        },
+                                                        "is_active": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "created_at": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            },
+                                            "updated_at": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            }
+                                        },
+                                        "type": "object"
                                     }
                                 }
                             }
@@ -548,27 +643,50 @@
                 "tags": [
                     "Swipes"
                 ],
-                "summary": "Zapisz decyzję swipe (like/dislike)",
+                "summary": "Zapisz decyzję swipe (like/dislike) i zaktualizuj wagi parametrów",
                 "operationId": "79222349d0339c05122302c69982cf4e",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/SwipeDecisionRequest"
+                                "required": [
+                                    "dish_id",
+                                    "decision"
+                                ],
+                                "properties": {
+                                    "dish_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "decision": {
+                                        "type": "string",
+                                        "enum": [
+                                            "like",
+                                            "dislike"
+                                        ],
+                                        "example": "like"
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
                 },
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Zapisano",
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "success"
+                                        }
+                                    },
                                     "type": "object"
-                                },
-                                "example": []
+                                }
                             }
                         }
                     },
@@ -580,7 +698,21 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ValidationError"
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "dish_id": [
+                                                    "The selected dish id is invalid."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }

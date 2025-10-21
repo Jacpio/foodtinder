@@ -1,13 +1,9 @@
 <?php
 
 use App\Models\Dish;
+use App\Models\Parameter;
+use App\Models\ParameterWeight;
 use App\Models\User;
-use App\Models\Category;
-use App\Models\Cuisine;
-use App\Models\Flavour;
-use App\Models\CategoryWeight;
-use App\Models\CuisineWeight;
-use App\Models\FlavourWeight;
 use App\Services\RecommendationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -17,140 +13,112 @@ beforeEach(function () {
     $this->service = new RecommendationService();
     $this->user = User::factory()->create();
 
-    $this->category1 = Category::factory()->create();
-    $this->category2 = Category::factory()->create();
-    $this->cuisine1 = Cuisine::factory()->create();
-    $this->cuisine2 = Cuisine::factory()->create();
-    $this->flavour1 = Flavour::factory()->create();
-    $this->flavour2 = Flavour::factory()->create();
+    $this->makeParam = function (string $name, string $type): Parameter {
+        return Parameter::firstOrCreate(['name' => $name, 'type' => $type], ['value' => 1, 'is_active' => true]);
+    };
+
+    $this->attachDishParams = function (Dish $dish, array $params) {
+        $dish->parameters()->syncWithoutDetaching(collect($params)->pluck('id'));
+    };
 });
 
 it('returns only dishes with match_score > 0 and sorts by score', function () {
-    $dish1 = Dish::factory()->create([
-        'category_id' => $this->category1->id,
-        'cuisine_id' => $this->cuisine1->id,
-        'flavour_id' => $this->flavour1->id,
-    ]);
-    $dish2 = Dish::factory()->create([
-        'category_id' => $this->category2->id,
-        'cuisine_id' => $this->cuisine2->id,
-        'flavour_id' => $this->flavour2->id,
-    ]);
+    $cat1 = ($this->makeParam)('Dania główne', 'category');
+    $cui1 = ($this->makeParam)('Włoska', 'cuisine');
+    $flv1 = ($this->makeParam)('Słony', 'flavour');
 
-    CategoryWeight::create([
-        'user_id' => $this->user->id,
-        'category_id' => $this->category1->id,
-        'weight' => 2,
-    ]);
-    CuisineWeight::create([
-        'user_id' => $this->user->id,
-        'cuisine_id' => $this->cuisine1->id,
-        'weight' => 3,
-    ]);
-    FlavourWeight::create([
-        'user_id' => $this->user->id,
-        'flavour_id' => $this->flavour1->id,
-        'weight' => 1,
-    ]);
+    $cat2 = ($this->makeParam)('Zupy', 'category');
+    $cui2 = ($this->makeParam)('Polska', 'cuisine');
+    $flv2 = ($this->makeParam)('Słodki', 'flavour');
+
+    $dish1 = Dish::factory()->create(['name' => 'Dish 1']);
+    ($this->attachDishParams)($dish1, [$cat1, $cui1, $flv1]);
+
+    $dish2 = Dish::factory()->create(['name' => 'Dish 2']);
+    ($this->attachDishParams)($dish2, [$cat2, $cui2, $flv2]);
+
+    ParameterWeight::create(['user_id' => $this->user->id, 'parameter_id' => $cat1->id, 'weight' => 2]);
+    ParameterWeight::create(['user_id' => $this->user->id, 'parameter_id' => $cui1->id, 'weight' => 3]);
+    ParameterWeight::create(['user_id' => $this->user->id, 'parameter_id' => $flv1->id, 'weight' => 1]);
 
     $recommended = $this->service->recommendedDishes($this->user);
 
-    expect($recommended->pluck('id')->toArray())->toEqual([
-        $dish1->id,
-    ])
-        ->and($recommended->first()->match_score)->toEqual(6);
+    expect($recommended->pluck('id')->toArray())->toEqual([$dish1->id])
+        ->and($recommended->first()->match_score)->toEqual(6.0);
 });
 
 it('calculates match_score correctly for single weight types', function () {
-    $dishCategoryOnly = Dish::factory()->create([
-        'category_id' => $this->category1->id,
-        'cuisine_id' => $this->cuisine2->id,
-        'flavour_id' => $this->flavour2->id,
-    ]);
+    $cat = ($this->makeParam)('Zupy', 'category');
+    $cui = ($this->makeParam)('Włoska', 'cuisine');
+    $flv = ($this->makeParam)('Słodki', 'flavour');
 
-    $dishCuisineOnly = Dish::factory()->create([
-        'category_id' => $this->category2->id,
-        'cuisine_id' => $this->cuisine1->id,
-        'flavour_id' => $this->flavour2->id,
-    ]);
+    $dishCategoryOnly = Dish::factory()->create(['name' => 'CategoryOnly']);
+    ($this->attachDishParams)($dishCategoryOnly, [$cat]);
 
-    $dishFlavourOnly = Dish::factory()->create([
-        'category_id' => $this->category2->id,
-        'cuisine_id' => $this->cuisine2->id,
-        'flavour_id' => $this->flavour1->id,
-    ]);
+    $dishCuisineOnly = Dish::factory()->create(['name' => 'CuisineOnly']);
+    ($this->attachDishParams)($dishCuisineOnly, [$cui]);
 
-    CategoryWeight::create([
-        'user_id' => $this->user->id,
-        'category_id' => $this->category1->id,
-        'weight' => 5,
-    ]);
-    CuisineWeight::create([
-        'user_id' => $this->user->id,
-        'cuisine_id' => $this->cuisine1->id,
-        'weight' => 3,
-    ]);
-    FlavourWeight::create([
-        'user_id' => $this->user->id,
-        'flavour_id' => $this->flavour1->id,
-        'weight' => 1,
-    ]);
+    $dishFlavourOnly = Dish::factory()->create(['name' => 'FlavourOnly']);
+    ($this->attachDishParams)($dishFlavourOnly, [$flv]);
+
+    ParameterWeight::create(['user_id' => $this->user->id, 'parameter_id' => $cat->id, 'weight' => 5]);
+    ParameterWeight::create(['user_id' => $this->user->id, 'parameter_id' => $cui->id, 'weight' => 3]);
+    ParameterWeight::create(['user_id' => $this->user->id, 'parameter_id' => $flv->id, 'weight' => 1]);
 
     $recommended = $this->service->recommendedDishes($this->user);
+    $scores = $recommended->pluck('match_score', 'name')->toArray();
 
-    $scores = $recommended->pluck('match_score', 'id')->toArray();
-
-    expect($scores[$dishCategoryOnly->id])->toEqual(5)
-        ->and($scores[$dishCuisineOnly->id])->toEqual(3)
-        ->and($scores[$dishFlavourOnly->id])->toEqual(1);
+    expect($scores['CategoryOnly'])->toEqual(5.0)
+        ->and($scores['CuisineOnly'])->toEqual(3.0)
+        ->and($scores['FlavourOnly'])->toEqual(1.0);
 });
 
-
 it('calculates match_score correctly for multiple weights', function () {
-    $dish = Dish::factory()->create([
-        'category_id' => $this->category1->id,
-        'cuisine_id' => $this->cuisine1->id,
-        'flavour_id' => $this->flavour1->id,
-    ]);
+    $cat = ($this->makeParam)('Dania główne', 'category'); // 2
+    $cui = ($this->makeParam)('Włoska', 'cuisine');        // 3
+    $flv = ($this->makeParam)('Słony', 'flavour');         // 1
 
-    CategoryWeight::create(['user_id' => $this->user->id, 'category_id' => $this->category1->id, 'weight' => 2]);
-    CuisineWeight::create(['user_id' => $this->user->id, 'cuisine_id' => $this->cuisine1->id, 'weight' => 3]);
-    FlavourWeight::create(['user_id' => $this->user->id, 'flavour_id' => $this->flavour1->id, 'weight' => 1]);
+    $dish = Dish::factory()->create(['name' => 'Combo']);
+    ($this->attachDishParams)($dish, [$cat, $cui, $flv]);
+
+    ParameterWeight::create(['user_id' => $this->user->id, 'parameter_id' => $cat->id, 'weight' => 2]);
+    ParameterWeight::create(['user_id' => $this->user->id, 'parameter_id' => $cui->id, 'weight' => 3]);
+    ParameterWeight::create(['user_id' => $this->user->id, 'parameter_id' => $flv->id, 'weight' => 1]);
 
     $recommended = $this->service->recommendedDishes($this->user);
-    expect($recommended->first()->match_score)->toEqual(6);
+    expect($recommended->first()->match_score)->toEqual(6.0);
 });
 
 it('returns empty if user has no weights', function () {
-    $dish = Dish::factory()->create([
-        'category_id' => $this->category1->id,
-        'cuisine_id' => $this->cuisine1->id,
-        'flavour_id' => $this->flavour1->id,
-    ]);
+    $cat = ($this->makeParam)('Zupy', 'category');
+    $cui = ($this->makeParam)('Polska', 'cuisine');
+    $flv = ($this->makeParam)('Słony', 'flavour');
+
+    $dish = Dish::factory()->create();
+    ($this->attachDishParams)($dish, [$cat, $cui, $flv]);
 
     $recommended = $this->service->recommendedDishes($this->user);
     expect($recommended)->toBeEmpty();
 });
 
-
 it('sorts dishes by match_score descending', function () {
-    $dish1 = Dish::factory()->create([
-        'category_id' => $this->category1->id,
-        'cuisine_id' => $this->cuisine1->id,
-        'flavour_id' => $this->flavour1->id,
-    ]);
-    $dish2 = Dish::factory()->create([
-        'category_id' => $this->category1->id,
-        'cuisine_id' => $this->cuisine1->id,
-        'flavour_id' => $this->flavour2->id,
-    ]);
+    $cat = ($this->makeParam)('Dania główne', 'category'); // 2
+    $cui = ($this->makeParam)('Włoska', 'cuisine');        // 3
+    $flv1 = ($this->makeParam)('Słony', 'flavour');        // 1
+    $flv2 = ($this->makeParam)('Słodki', 'flavour');       // 0
 
-    CategoryWeight::create(['user_id' => $this->user->id, 'category_id' => $this->category1->id, 'weight' => 2]);
-    CuisineWeight::create(['user_id' => $this->user->id, 'cuisine_id' => $this->cuisine1->id, 'weight' => 3]);
-    FlavourWeight::create(['user_id' => $this->user->id, 'flavour_id' => $this->flavour1->id, 'weight' => 1]);
+    $dish1 = Dish::factory()->create(['name' => 'DishHigh']);
+    ($this->attachDishParams)($dish1, [$cat, $cui, $flv1]);
+
+    $dish2 = Dish::factory()->create(['name' => 'DishLow']);
+    ($this->attachDishParams)($dish2, [$cat, $cui, $flv2]);
+
+    ParameterWeight::create(['user_id' => $this->user->id, 'parameter_id' => $cat->id, 'weight' => 2]);
+    ParameterWeight::create(['user_id' => $this->user->id, 'parameter_id' => $cui->id, 'weight' => 3]);
+    ParameterWeight::create(['user_id' => $this->user->id, 'parameter_id' => $flv1->id, 'weight' => 1]);
 
     $recommended = $this->service->recommendedDishes($this->user);
 
-    expect($recommended->pluck('id')->first())->toEqual($dish1->id)
-        ->and($recommended->pluck('id')->last())->toEqual($dish2->id);
+    expect($recommended->pluck('name')->first())->toEqual('DishHigh')
+        ->and($recommended->pluck('name')->last())->toEqual('DishLow');
 });

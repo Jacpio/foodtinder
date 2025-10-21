@@ -27,23 +27,36 @@ use OpenApi\Annotations as OA;
      *   @OA\Parameter(
      *     name="limit", in="query", required=false,
      *     description="Maksymalna liczba pozycji",
-     *     @OA\Schema(type="integer", minimum=1, maximum=20, default="")
+     *     @OA\Schema(type="integer", minimum=1, maximum=20, default=10)
      *   ),
      *   @OA\Response(
      *     response=200,
      *     description="OK",
      *     @OA\JsonContent(
      *       type="array",
-     *       @OA\Items(ref="#/components/schemas/DishWithScore"),
-     *       example={
-     *         {"id":101,"name":"Spaghetti Carbonara","category_id":1,"cuisine_id":3,"flavour_id":5,"image_url":"spaghetti.jpg","image_url_full":"http://localhost/storage/spaghetti.jpg","description":"Classic","match_score":0.93}
-     *       }
+     *       @OA\Items(
+     *         type="object",
+     *         @OA\Property(property="id", type="integer", example=101),
+     *         @OA\Property(property="name", type="string", example="Spaghetti Carbonara"),
+     *         @OA\Property(property="description", type="string", nullable=true, example="Classic"),
+     *         @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
+     *         @OA\Property(
+     *           property="parameters",
+     *           type="array",
+     *           @OA\Items(
+     *             type="object",
+     *             @OA\Property(property="id", type="integer", example=5),
+     *             @OA\Property(property="name", type="string", example="Włoska"),
+     *             @OA\Property(property="type", type="string", enum={"category","cuisine","flavour","other"}, example="cuisine")
+     *           )
+     *         ),
+     *         @OA\Property(property="match_score", type="number", format="float", example=3.0)
+     *       )
      *     )
      *   ),
      *   @OA\Response(response=401, description="Unauthenticated")
      * )
      */
-
     public function recommendation(Request $request): JsonResponse{
         $data = $request->validate([
             'limit' => 'nullable|integer|min:1',

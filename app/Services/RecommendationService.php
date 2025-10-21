@@ -2,41 +2,46 @@
 
 namespace App\Services;
 
-use App\Models\CategoryWeight;
-use App\Models\CuisineWeight;
 use App\Models\Dish;
-use App\Models\FlavourWeight;
+use App\Models\ParameterWeight;
 use App\Models\User;
+use Illuminate\Support\Collection;
 
 class RecommendationService
 {
-    public function recommendedDishes(User $user, ?int $limit = null)
+    /**
+     *
+     * @return \Illuminate\Support\Collection  // kolekcja Dish z atrybutem -> match_score
+     */
+    public function recommendedDishes(User $user, ?int $limit = null): Collection
     {
-        $collection = Dish::with(['category', 'cuisine', 'flavour'])
-            ->get()
-            ->map(function ($dish) use ($user) {
-                $categoryWeight = CategoryWeight::where('user_id', $user->id)
-                    ->where('category_id', $dish->category_id)
-                    ->value('weight') ?? 0;
+        $weights = ParameterWeight::where('user_id', $user->id)
+            ->pluck('weight', 'parameter_id');
 
-                $cuisineWeight = CuisineWeight::where('user_id', $user->id)
-                    ->where('cuisine_id', $dish->cuisine_id)
-                    ->value('weight') ?? 0;
+        $relevantTypes = ['category', 'cuisine', 'flavour', 'other'];
 
-                $flavourWeight = 0;
-                if ($dish->flavour) {
-                    $flavourWeight = FlavourWeight::where('user_id', $user->id)
-                        ->where('flavour_id', $dish->flavour->id)
-                        ->value('weight') ?? 0;
-                }
+        $dishes = Dish::with(['parameters' => function ($q) use ($relevantTypes) {
+            $q->select('parameters.id', 'name', 'type')
+            ->whereIn('type', $relevantTypes);
+        }])
+            ->get();
 
-                $dish->match_score = $categoryWeight + $cuisineWeight + $flavourWeight;
+        $scored = $dishes->map(function (Dish $dish) use ($weights): Dish {
+            $score = 0.0;
 
-                return $dish;
-            })
-            ->filter(fn($dish) => $dish->match_score > 0)
+            foreach ($dish->parameters as $param) {
+                $pid = $param->id;
+                $score += (float) ($weights[$pid] ?? 0.0);
+            }
+
+            $dish->setAttribute('match_score', $score);
+
+            return $dish;
+        })
+            ->filter(fn (Dish $d) => ($d->match_score ?? 0) > 0)
             ->sortByDesc('match_score')
             ->values();
-        return $limit ? $collection->take($limit)->values() : $collection;
+
+        return $limit ? $scored->take($limit)->values() : $scored;
     }
 }
