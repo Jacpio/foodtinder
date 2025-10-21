@@ -624,84 +624,166 @@
                 "tags": [
                     "Recommendations"
                 ],
-                "summary": "Rekomendacje dla użytkowników",
-                "description": "Zwraca listę rekomendowanych dań dla aktualnego użytkownika.",
+                "summary": "Rekomendacje dla użytkownika (paginowane)",
+                "description": "Zwraca paginowaną listę rekomendowanych dań z polem `match_score`.",
                 "operationId": "recommendation",
                 "parameters": [
                     {
-                        "name": "limit",
+                        "name": "per_page",
                         "in": "query",
-                        "description": "Maksymalna liczba pozycji",
+                        "description": "Ilość na stronę (1–10, domyślnie 10)",
                         "required": false,
                         "schema": {
                             "type": "integer",
                             "default": 10,
-                            "maximum": 20,
+                            "maximum": 10,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Numer strony (>=1, domyślnie 1)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
                             "minimum": 1
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "OK (LengthAwarePaginator)",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 101
-                                            },
-                                            "name": {
-                                                "type": "string",
-                                                "example": "Spaghetti Carbonara"
-                                            },
-                                            "description": {
-                                                "type": "string",
-                                                "example": "Classic",
-                                                "nullable": true
-                                            },
-                                            "image_url": {
-                                                "type": "string",
-                                                "example": "spaghetti.jpg",
-                                                "nullable": true
-                                            },
-                                            "parameters": {
-                                                "type": "array",
-                                                "items": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer",
-                                                            "example": 5
-                                                        },
-                                                        "name": {
-                                                            "type": "string",
-                                                            "example": "Włoska"
-                                                        },
-                                                        "type": {
-                                                            "type": "string",
-                                                            "enum": [
-                                                                "category",
-                                                                "cuisine",
-                                                                "flavour",
-                                                                "other"
-                                                            ],
-                                                            "example": "cuisine"
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 101
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Spaghetti Carbonara"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Classic",
+                                                        "nullable": true
+                                                    },
+                                                    "image_url": {
+                                                        "type": "string",
+                                                        "example": "spaghetti.jpg",
+                                                        "nullable": true
+                                                    },
+                                                    "parameters": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 5
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "Włoska"
+                                                                },
+                                                                "type": {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "category",
+                                                                        "cuisine",
+                                                                        "flavour",
+                                                                        "other"
+                                                                    ],
+                                                                    "example": "cuisine"
+                                                                }
+                                                            },
+                                                            "type": "object"
                                                         }
                                                     },
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "match_score": {
-                                                "type": "number",
-                                                "format": "float",
-                                                "example": 3
+                                                    "match_score": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 6
+                                                    }
+                                                },
+                                                "type": "object"
                                             }
                                         },
-                                        "type": "object"
-                                    }
+                                        "first_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/recommended-dishes?page=1"
+                                        },
+                                        "from": {
+                                            "type": "integer",
+                                            "example": 1,
+                                            "nullable": true
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "last_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/recommended-dishes?page=5"
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "url": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "label": {
+                                                        "type": "string"
+                                                    },
+                                                    "active": {
+                                                        "type": "boolean"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "next_page_url": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/recommended-dishes?page=2",
+                                            "nullable": true
+                                        },
+                                        "path": {
+                                            "type": "string",
+                                            "example": "http://localhost/api/recommended-dishes"
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "prev_page_url": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "to": {
+                                            "type": "integer",
+                                            "example": 10,
+                                            "nullable": true
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 47
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }

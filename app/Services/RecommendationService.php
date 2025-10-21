@@ -3,45 +3,44 @@
 namespace App\Services;
 
 use App\Models\Dish;
-use App\Models\ParameterWeight;
 use App\Models\User;
-use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class RecommendationService
 {
     /**
      *
-     * @return \Illuminate\Support\Collection  // kolekcja Dish z atrybutem -> match_score
+     * @return \Illuminate\Support\Collection
      */
-    public function recommendedDishes(User $user, ?int $limit = null): Collection
+    public function recommendedDishes(User $user, int $perPage = 10): LengthAwarePaginator
     {
-        $weights = ParameterWeight::where('user_id', $user->id)
-            ->pluck('weight', 'parameter_id');
-
         $relevantTypes = ['category', 'cuisine', 'flavour', 'other'];
 
-        $dishes = Dish::with(['parameters' => function ($q) use ($relevantTypes) {
-            $q->select('parameters.id', 'name', 'type')
-            ->whereIn('type', $relevantTypes);
-        }])
-            ->get();
+        $scores = DB::table('dish_parameters')
+            ->join('parameters', 'parameters.id', '=', 'dish_parameters.parameter_id')
+            ->leftJoin('parameter_weights', function ($join) use ($user) {
+                $join->on('parameter_weights.parameter_id', '=', 'parameters.id')
+                    ->where('parameter_weights.user_id', '=', $user->id);
+            })
+            ->whereIn('parameters.type', $relevantTypes)
+            ->groupBy('dish_parameters.dish_id')
+            ->select(
+                'dish_parameters.dish_id',
+                DB::raw('COALESCE(SUM(parameter_weights.weight), 0) AS match_score')
+            );
 
-        $scored = $dishes->map(function (Dish $dish) use ($weights): Dish {
-            $score = 0.0;
-
-            foreach ($dish->parameters as $param) {
-                $pid = $param->id;
-                $score += (float) ($weights[$pid] ?? 0.0);
-            }
-
-            $dish->setAttribute('match_score', $score);
-
-            return $dish;
-        })
-            ->filter(fn (Dish $d) => ($d->match_score ?? 0) > 0)
-            ->sortByDesc('match_score')
-            ->values();
-
-        return $limit ? $scored->take($limit)->values() : $scored;
+        return Dish::query()
+            ->joinSub($scores, 'scores', function ($join) {
+                $join->on('scores.dish_id', '=', 'dishes.id');
+            })
+            ->where('scores.match_score', '>', 0)
+            ->orderByDesc('scores.match_score')
+            ->with(['parameters' => function ($q) use ($relevantTypes) {
+                $q->select('parameters.id', 'name', 'type')
+                    ->whereIn('type', $relevantTypes);
+            }])
+            ->select('dishes.*', 'scores.match_score')
+            ->paginate($perPage);
     }
 }
