@@ -619,6 +619,316 @@
                 ]
             }
         },
+        "/api/parameters": {
+            "get": {
+                "tags": [
+                    "Parameters"
+                ],
+                "summary": "Lista parametrów (paginowana)",
+                "operationId": "f4e45c6fb51bf003fed04ddc487a4c1e",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Ilość na stronę (1–10, domyślnie 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "maximum": 10,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Numer strony (>=1, domyślnie 1)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedParameters"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Parameters"
+                ],
+                "summary": "Utwórz nowy parametr",
+                "operationId": "c7ffaec53fe69621c6e91a3761d80706",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Włoska"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "category",
+                                            "cuisine",
+                                            "flavour",
+                                            "other"
+                                        ],
+                                        "example": "cuisine"
+                                    },
+                                    "value": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Parameter"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/parameters/{id}": {
+            "get": {
+                "tags": [
+                    "Parameters"
+                ],
+                "summary": "Szczegóły parametru",
+                "operationId": "5c91e020d20799665978c008acbe8025",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Parameter"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Parameters"
+                ],
+                "summary": "Aktualizuj parametr",
+                "operationId": "5df579f997be1636e52db7f97396a143",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Polska"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "category",
+                                            "cuisine",
+                                            "flavour",
+                                            "other"
+                                        ]
+                                    },
+                                    "value": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Parameter"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Parameters"
+                ],
+                "summary": "Usuń parametr",
+                "operationId": "4c93fec8f46609f0a8a3b85e8fa4d755",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/recommended-dishes": {
             "get": {
                 "tags": [
@@ -1019,6 +1329,121 @@
     },
     "components": {
         "schemas": {
+            "Parameter": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Włoska"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "category",
+                            "cuisine",
+                            "flavour",
+                            "other"
+                        ],
+                        "example": "cuisine"
+                    },
+                    "value": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 1
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "PaginatedParameters": {
+                "properties": {
+                    "current_page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Parameter"
+                        }
+                    },
+                    "first_page_url": {
+                        "type": "string",
+                        "example": "http://localhost/api/parameters?page=1"
+                    },
+                    "from": {
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "last_page": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "last_page_url": {
+                        "type": "string",
+                        "example": "http://localhost/api/parameters?page=3"
+                    },
+                    "links": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "url": {
+                                    "type": "string",
+                                    "nullable": true
+                                },
+                                "label": {
+                                    "type": "string"
+                                },
+                                "active": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "next_page_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "path": {
+                        "type": "string",
+                        "example": "http://localhost/api/parameters"
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "prev_page_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "to": {
+                        "type": "integer",
+                        "example": 10,
+                        "nullable": true
+                    },
+                    "total": {
+                        "type": "integer",
+                        "example": 25
+                    }
+                },
+                "type": "object"
+            },
             "AuthUser": {
                 "required": [
                     "id",
@@ -1043,10 +1468,6 @@
                         "type": "string",
                         "format": "date-time",
                         "example": "2025-10-17T19:52:15.000000Z"
-                    },
-                    "status": {
-                        "type": "string",
-                        "example": "verification-link-sent"
                     }
                 },
                 "type": "object"
@@ -1159,53 +1580,19 @@
                 },
                 "type": "object"
             },
-            "MessageResponse": {
+            "StatusResponse": {
                 "properties": {
-                    "message": {
+                    "status": {
                         "type": "string",
-                        "example": "Successfully logged out"
+                        "example": "verification-link-sent"
                     }
                 },
                 "type": "object"
-            },
-            "ValidationError": {
-                "required": [
-                    "message",
-                    "errors"
-                ],
-                "properties": {
-                    "message": {
-                        "type": "string",
-                        "example": "The given data was invalid."
-                    },
-                    "errors": {
-                        "type": "object",
-                        "additionalProperties": {
-                            "schema": "AuthSchemas",
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "example": "The field is required."
-                            }
-                        }
-                    }
-                },
-                "type": "object"
-            },
-            "AuthSchemas": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "example": "The field is required."
-                }
             },
             "Dish": {
                 "required": [
                     "id",
-                    "name",
-                    "category_id",
-                    "cuisine_id",
-                    "flavour_id"
+                    "name"
                 ],
                 "properties": {
                     "id": {
@@ -1215,18 +1602,6 @@
                     "name": {
                         "type": "string",
                         "example": "Spaghetti Carbonara"
-                    },
-                    "category_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "cuisine_id": {
-                        "type": "integer",
-                        "example": 3
-                    },
-                    "flavour_id": {
-                        "type": "integer",
-                        "example": 5
                     },
                     "image_url": {
                         "type": "string",
@@ -1290,6 +1665,52 @@
                     }
                 },
                 "type": "object"
+            },
+            "MessageResponse": {
+                "required": [
+                    "message"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Success"
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationError": {
+                "required": [
+                    "message",
+                    "errors"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": {
+                            "name": [
+                                "The name field is required."
+                            ]
+                        },
+                        "additionalProperties": {
+                            "schema": "Schemas",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "Schemas": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
             }
         },
         "securitySchemes": {
@@ -1308,6 +1729,10 @@
         {
             "name": "Dishes",
             "description": "Dishes"
+        },
+        {
+            "name": "Parameters",
+            "description": "Parameters"
         },
         {
             "name": "Recommendations",

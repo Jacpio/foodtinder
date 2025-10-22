@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\DB;
 class RecommendationService
 {
     /**
-     *
-     * @return \Illuminate\Support\Collection
+     * @return LengthAwarePaginator;
      */
     public function recommendedDishes(User $user, int $perPage = 10): LengthAwarePaginator
     {

@@ -59,30 +59,9 @@ use OpenApi\Annotations as OA;
  * )
  *
  * @OA\Schema(
- *   schema="MessageResponse",
- *   type="object",
- *   @OA\Property(property="message", type="string", example="Successfully logged out")
- * )
- *
- * @OA.Schema(
  *   schema="StatusResponse",
  *   type="object",
  *   @OA\Property(property="status", type="string", example="verification-link-sent")
- * )
- *
- * @OA\Schema(
- *   schema="ValidationError",
- *   type="object",
- *   required={"message","errors"},
- *   @OA\Property(property="message", type="string", example="The given data was invalid."),
- *   @OA\Property(
- *     property="errors",
- *     type="object",
- *     additionalProperties=@OA\Schema(
- *       type="array",
- *       @OA\Items(type="string", example="The field is required.")
- *     )
- *   )
  * )
  */
 final class AuthSchemas {}
