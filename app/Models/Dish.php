@@ -46,7 +46,9 @@ class Dish extends Model
 
     public function parameters(): BelongsToMany
     {
-        return $this->BelongsToMany(Parameter::class, 'dish_parameters')->withTimestamps();
+        return $this->belongsToMany(Parameter::class, 'dish_parameters')
+            ->withTimestamps();
+
     }
 
     public function getImageUrlFullAttribute(): string

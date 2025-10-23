@@ -74,9 +74,9 @@ it('calculates match_score correctly for single weight types', function () {
 });
 
 it('calculates match_score correctly for multiple weights', function () {
-    $cat = ($this->makeParam)('Dania główne', 'category'); // 2
-    $cui = ($this->makeParam)('Włoska', 'cuisine');        // 3
-    $flv = ($this->makeParam)('Słony', 'flavour');         // 1
+    $cat = ($this->makeParam)('Dania główne', 'category');
+    $cui = ($this->makeParam)('Włoska', 'cuisine');
+    $flv = ($this->makeParam)('Słony', 'flavour');
 
     $dish = Dish::factory()->create(['name' => 'Combo']);
     ($this->attachDishParams)($dish, [$cat, $cui, $flv]);
@@ -102,10 +102,10 @@ it('returns empty if user has no weights', function () {
 });
 
 it('sorts dishes by match_score descending', function () {
-    $cat = ($this->makeParam)('Dania główne', 'category'); // 2
-    $cui = ($this->makeParam)('Włoska', 'cuisine');        // 3
-    $flv1 = ($this->makeParam)('Słony', 'flavour');        // 1
-    $flv2 = ($this->makeParam)('Słodki', 'flavour');       // 0
+    $cat = ($this->makeParam)('Dania główne', 'category');
+    $cui = ($this->makeParam)('Włoska', 'cuisine');
+    $flv1 = ($this->makeParam)('Słony', 'flavour');
+    $flv2 = ($this->makeParam)('Słodki', 'flavour');
 
     $dish1 = Dish::factory()->create(['name' => 'DishHigh']);
     ($this->attachDishParams)($dish1, [$cat, $cui, $flv1]);

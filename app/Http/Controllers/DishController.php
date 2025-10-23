@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CSVRequest;
 use App\Models\Dish;
+use App\Services\ImportCSVDish;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -11,6 +13,10 @@ use OpenApi\Annotations as OA;
 
 class DishController extends Controller
 {
+    public function __construct(private readonly ImportCSVDish $CSVDish)
+    {
+    }
+
     /**
      * @OA\Get(
      *   path="/api/dishes",
@@ -183,7 +189,7 @@ class DishController extends Controller
      *   @OA\Response(response=422, description="Validation error")
      * )
      */
-    public function create(Request $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
             'name'           => 'required|string|max:255',
@@ -338,6 +344,60 @@ class DishController extends Controller
         }
         $dish->delete();
 
+        return response()->json(['message' => 'Success'], 200);
+    }
+    /**
+     * @OA\Post(
+     *   path="/api/dish/import-csv",
+     *   tags={"Dishes"},
+     *   summary="Importuj potrawy z pliku CSV",
+     *   description="Przyjmuje plik CSV i importuje potrawy.",
+     *   security={{"bearerAuth": {}}},
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *       mediaType="multipart/form-data",
+     *       @OA\Schema(
+     *         type="object",
+     *         required={"file"},
+     *         @OA\Property(
+     *           property="file",
+     *           type="string",
+     *           format="binary",
+     *           description="Plik CSV (nagłówki: id,name,image_url,description)"
+     *         ),
+     *         @OA\Property(
+     *           property="delimiter",
+     *           type="string",
+     *           description="Separator kolumn (opcjonalny)",
+     *           enum={",",";","|","\\t","comma","semicolon","pipe","tab"}
+     *           default=","
+     *         )
+     *       )
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Sukces",
+     *     @OA\JsonContent(ref="#/components/schemas/MessageResponse")
+     *   ),
+     *   @OA\Response(
+     *     response=422,
+     *     description="Błędne dane (walidacja lub niepoprawny CSV)",
+     *     @OA\JsonContent(ref="#/components/schemas/MessageResponse")
+     *   ),
+     *   @OA\Response(response=401, description="Unauthenticated"),
+     *   @OA\Response(response=403, description="Forbidden")
+     * )
+     */
+    public function importCSV(CSVRequest $request): JsonResponse
+    {
+        $data =  $request->validated();
+        $uploaded = $request->file('file');
+        $status = $this->CSVDish->createDishByFile($uploaded, $data);
+        if (!$status) {
+            return response()->json(['message' => 'Bad data'], 422);
+        }
         return response()->json(['message' => 'Success'], 200);
     }
 }

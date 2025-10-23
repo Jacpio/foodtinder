@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('dish_parameters', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('dish_id')->constrained('dishes')->cascadeOnDelete();
-            $table->foreignId('parameter_id')->constrained('parameters')->cascadeOnDelete();
+            $table->foreignId('dish_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('parameter_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
+            $table->unique(['dish_id','parameter_id']);
         });
     }
 

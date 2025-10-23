@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CSVRequest;
 use App\Models\Parameter;
+use App\Services\CSVImporter;
+use App\Services\ImportCSVParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use OpenApi\Annotations as OA;
+use Spatie\SimpleExcel\SimpleExcelReader;
 
 /**
  * @OA\Schema(
@@ -57,6 +61,9 @@ use OpenApi\Annotations as OA;
  */
 class ParameterController extends Controller
 {
+    public function __construct(private readonly ImportCSVParameter $CSVParameter)
+    {}
+
     /**
      * @OA\Get(
      *   path="/api/parameters",
@@ -218,17 +225,77 @@ class ParameterController extends Controller
         if (!$parameter) {
             return response()->json(['message' => 'Not found'], 404);
         }
+        
+        \DB::transaction(function () use ($parameter) {
+            if (method_exists($parameter, 'dishes')) {
+                $parameter->dishes()->detach();
+            }
 
-        if (method_exists($parameter, 'dishes')) {
-            $parameter->dishes()->detach();
-        }
+            if (method_exists($parameter, 'weights')) {
+                $parameter->weights()->delete();
+            }
+
+            $parameter->delete();
+        });
+
 
         $parameter->delete();
 
         return response()->json(['message' => 'Success'], 200);
     }
-    public function importCSV(Request $request): JsonResponse{
 
+    /**
+     * @OA\Post(
+     *   path="/api/parameter/import-csv",
+     *   tags={"Dishes"},
+     *   summary="Importuj potrawy z pliku CSV",
+     *   description="Przyjmuje plik CSV i importuje potrawy.",
+     *   security={{"bearerAuth": {}}},
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *       mediaType="multipart/form-data",
+     *       @OA\Schema(
+     *         type="object",
+     *         required={"file"},
+     *         @OA\Property(
+     *           property="file",
+     *           type="string",
+     *           format="binary",
+     *           description="Plik CSV (nagłówki: id,name,type,value,isActive)"
+     *         ),
+     *         @OA\Property(
+     *           property="delimiter",
+     *           type="string",
+     *           description="Separator kolumn (opcjonalny)",
+     *           enum={",",";","|","\\t","comma","semicolon","pipe","tab"}
+     *           default=","
+     *         )
+     *       )
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Sukces",
+     *     @OA\JsonContent(ref="#/components/schemas/MessageResponse")
+     *   ),
+     *   @OA\Response(
+     *     response=422,
+     *     description="Błędne dane (walidacja lub niepoprawny CSV)",
+     *     @OA\JsonContent(ref="#/components/schemas/MessageResponse")
+     *   ),
+     *   @OA\Response(response=401, description="Unauthenticated"),
+     *   @OA\Response(response=403, description="Forbidden")
+     * )
+     */
+    public function importCSV(CSVRequest $request): JsonResponse
+    {
+        $data =  $request->validated();
+        $uploaded = $request->file('file');
+        $status = $this->CSVParameter->createParameterByFile($uploaded, $data);
+        if (!$status) {
+            return response()->json(['message' => 'Bad data'], 422);
+        }
         return response()->json(['message' => 'Success'], 200);
     }
 }

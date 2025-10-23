@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -14,9 +16,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $is_active
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Dish> $dishes
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Dish> $dishes
  * @property-read int|null $dishes_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ParameterWeight> $weights
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ParameterWeight> $weights
  * @property-read int|null $weights_count
  * @method static Builder<static>|Parameter active()
  * @method static Builder<static>|Parameter newModelQuery()
@@ -33,6 +35,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Parameter extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'name', 'type', 'value', 'is_active',
     ];
@@ -41,14 +44,16 @@ class Parameter extends Model
         'value' => 'float',
         'is_active' => 'boolean',
     ];
+    public function dishes()
+    {
+        return $this->belongsToMany(Dish::class, 'dish_parameters')->withTimestamps();
+    }
+
     public function weights(): HasMany
     {
         return $this->hasMany(ParameterWeight::class);
     }
-    public function dishes(): HasMany
-    {
-        return $this->hasMany(Dish::class);
-    }
+
     public function scopeActive(Builder $q): Builder
     {
         return $q->where('is_active', true);
