@@ -350,8 +350,8 @@ class DishController extends Controller
      * @OA\Post(
      *   path="/api/dish/import-csv",
      *   tags={"Dishes"},
-     *   summary="Importuj potrawy z pliku CSV",
-     *   description="Przyjmuje plik CSV i importuje potrawy.",
+     *   summary="Importuj CSV z plików",
+     *   description="Importuje dania za pomocą CSV",
      *   security={{"bearerAuth": {}}},
      *   @OA\RequestBody(
      *     required=true,
@@ -369,21 +369,21 @@ class DishController extends Controller
      *         @OA\Property(
      *           property="delimiter",
      *           type="string",
-     *           description="Separator kolumn (opcjonalny)",
-     *           enum={",",";","|","\\t","comma","semicolon","pipe","tab"}
-     *           default=","
+     *           description="Dozwolone: comma(,), semicolon(;), pipe(|), tab(\\t). Default: comma",
+     *           enum={"comma","semicolon","pipe","tab"},
+     *           default="comma"
      *         )
      *       )
      *     )
      *   ),
      *   @OA\Response(
      *     response=200,
-     *     description="Sukces",
+     *     description="Success",
      *     @OA\JsonContent(ref="#/components/schemas/MessageResponse")
      *   ),
      *   @OA\Response(
      *     response=422,
-     *     description="Błędne dane (walidacja lub niepoprawny CSV)",
+     *     description="Bad data (validation or invalid CSV)",
      *     @OA\JsonContent(ref="#/components/schemas/MessageResponse")
      *   ),
      *   @OA\Response(response=401, description="Unauthenticated"),

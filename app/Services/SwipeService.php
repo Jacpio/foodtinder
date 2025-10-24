@@ -60,4 +60,30 @@ class SwipeService
     {
         return max($min, min($max, $v));
     }
+
+    public function getUnswipedDishesByParameter(?User $user, int $limit, int $parameterId): Collection
+    {
+        $swipedDishIds = collect();
+
+        if ($user) {
+            if (method_exists($user, 'swipes')) {
+                $swipedDishIds = $user->swipes()->pluck('dish_id');
+            } elseif (method_exists($user, 'likedDishes')) {
+                $swipedDishIds = $user->likedDishes()->pluck('dishes.id');
+            }
+        }
+
+        $base = Dish::query()
+            ->with('parameters')
+            ->when($swipedDishIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $swipedDishIds))
+            ->whereHas('parameters', fn ($q) => $q->where('parameters.id', $parameterId));
+
+        $available = (clone $base)->count();
+        $limit = max(0, min($limit, $available));
+
+        return $base
+            ->inRandomOrder()
+            ->take($limit)
+            ->get();
+    }
 }

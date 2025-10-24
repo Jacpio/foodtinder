@@ -4,13 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CSVRequest;
 use App\Models\Parameter;
-use App\Services\CSVImporter;
 use App\Services\ImportCSVParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use OpenApi\Annotations as OA;
-use Spatie\SimpleExcel\SimpleExcelReader;
 
 /**
  * @OA\Schema(
@@ -68,6 +66,7 @@ class ParameterController extends Controller
      * @OA\Get(
      *   path="/api/parameters",
      *   tags={"Parameters"},
+     *   security={{"bearerAuth": {}}},
      *   summary="Lista parametrów (paginowana)",
      *   @OA\Parameter(
      *     name="per_page", in="query", required=false,
@@ -107,6 +106,7 @@ class ParameterController extends Controller
      * @OA\Get(
      *   path="/api/parameters/{id}",
      *   tags={"Parameters"},
+     *   security={{"bearerAuth": {}}},
      *   summary="Szczegóły parametru",
      *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *   @OA\Response(response=200, description="OK", @OA\JsonContent(ref="#/components/schemas/Parameter")),
@@ -225,7 +225,7 @@ class ParameterController extends Controller
         if (!$parameter) {
             return response()->json(['message' => 'Not found'], 404);
         }
-        
+
         \DB::transaction(function () use ($parameter) {
             if (method_exists($parameter, 'dishes')) {
                 $parameter->dishes()->detach();
@@ -247,9 +247,9 @@ class ParameterController extends Controller
     /**
      * @OA\Post(
      *   path="/api/parameter/import-csv",
-     *   tags={"Dishes"},
-     *   summary="Importuj potrawy z pliku CSV",
-     *   description="Przyjmuje plik CSV i importuje potrawy.",
+     *   tags={"Parameters"},
+     *   summary="Importuj CSV z plików",
+     *   description="Importuje dania za pomocą CSV",
      *   security={{"bearerAuth": {}}},
      *   @OA\RequestBody(
      *     required=true,
@@ -262,26 +262,26 @@ class ParameterController extends Controller
      *           property="file",
      *           type="string",
      *           format="binary",
-     *           description="Plik CSV (nagłówki: id,name,type,value,isActive)"
+     *           description="Plik CSV (nagłówki: id,name,type,value, isActive)"
      *         ),
      *         @OA\Property(
      *           property="delimiter",
      *           type="string",
-     *           description="Separator kolumn (opcjonalny)",
-     *           enum={",",";","|","\\t","comma","semicolon","pipe","tab"}
-     *           default=","
+     *           description="Dozwolone: comma(,), semicolon(;), pipe(|), tab(\\t). Default: comma",
+     *           enum={"comma","semicolon","pipe","tab"},
+     *           default="comma"
      *         )
      *       )
      *     )
      *   ),
      *   @OA\Response(
      *     response=200,
-     *     description="Sukces",
+     *     description="Success",
      *     @OA\JsonContent(ref="#/components/schemas/MessageResponse")
      *   ),
      *   @OA\Response(
      *     response=422,
-     *     description="Błędne dane (walidacja lub niepoprawny CSV)",
+     *     description="Bad data (validation or invalid CSV)",
      *     @OA\JsonContent(ref="#/components/schemas/MessageResponse")
      *   ),
      *   @OA\Response(response=401, description="Unauthenticated"),

@@ -242,7 +242,7 @@
                     "Dishes"
                 ],
                 "summary": "Utwórz nową potrawę",
-                "operationId": "4055da700195ec26e05d953ac8fe8a0a",
+                "operationId": "3fc0252a7de74dac3747d26739c844cb",
                 "requestBody": {
                     "description": "Wspiera JSON oraz multipart/form-data. Dołącz `parameter_ids[]` aby przypiąć parametry.",
                     "required": true,
@@ -619,6 +619,129 @@
                 ]
             }
         },
+        "/api/dish/import-csv": {
+            "post": {
+                "tags": [
+                    "Dishes"
+                ],
+                "summary": "Importuj CSV z plików",
+                "description": "Importuje dania za pomocą CSV",
+                "operationId": "f7ae4c17471ee2106d40566ceb3b285f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "description": "Plik CSV (nagłówki: id,name,image_url,description)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "delimiter": {
+                                        "description": "Dozwolone: comma(,), semicolon(;), pipe(|), tab(\\\\t). Default: comma",
+                                        "type": "string",
+                                        "default": "comma",
+                                        "enum": [
+                                            "comma",
+                                            "semicolon",
+                                            "pipe",
+                                            "tab"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Bad data (validation or invalid CSV)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/get-the-most-popular-parameters": {
+            "get": {
+                "tags": [
+                    "Swipes"
+                ],
+                "summary": "Linki do najczęściej lubianych parametrów użytkownika",
+                "description": "Zwraca tablicę URL-i do endpointu zwracającego karty po parametrze.",
+                "operationId": "getMostPopularParametersLinks",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Ile linków zwrócić (1–50, domyślnie 6)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 6,
+                            "maximum": 50,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "http://127.0.0.1:8000/api/swipe-cards-by-parameter/14"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/parameters": {
             "get": {
                 "tags": [
@@ -662,7 +785,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -782,7 +910,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -920,6 +1053,80 @@
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/parameter/import-csv": {
+            "post": {
+                "tags": [
+                    "Parameters"
+                ],
+                "summary": "Importuj CSV z plików",
+                "description": "Importuje dania za pomocą CSV",
+                "operationId": "475884bce5383ada696bfc527e956740",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "description": "Plik CSV (nagłówki: id,name,type,value, isActive)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "delimiter": {
+                                        "description": "Dozwolone: comma(,), semicolon(;), pipe(|), tab(\\\\t). Default: comma",
+                                        "type": "string",
+                                        "default": "comma",
+                                        "enum": [
+                                            "comma",
+                                            "semicolon",
+                                            "pipe",
+                                            "tab"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Bad data (validation or invalid CSV)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
                     }
                 },
                 "security": [
@@ -1115,7 +1322,7 @@
                     "Swipes"
                 ],
                 "summary": "Pobierz karty do swipe’owania (nieswipe’owane dania z przypiętymi parametrami)",
-                "description": "Zwraca losową listę nieswipe’owanych dań aktualnego użytkownika wraz z ich parametrami (category/cuisine/flavour/other).",
+                "description": "Zwraca losową listę nieswipe’owanych dań aktualnego użytkownika wraz z ich parametrami",
                 "operationId": "bc06d8eb51e2659b92e2f932a862e578",
                 "parameters": [
                     {
@@ -1123,6 +1330,119 @@
                         "in": "query",
                         "description": "Ile kart zwrócić (1–10, domyślnie 5)",
                         "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 5,
+                            "maximum": 10,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista dań",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Spaghetti Bolognese"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "example": "Klasyczny makaron z sosem pomidorowo-mięsnym.",
+                                                "nullable": true
+                                            },
+                                            "image_url": {
+                                                "type": "string",
+                                                "example": "spaghetti.jpg",
+                                                "nullable": true
+                                            },
+                                            "parameters": {
+                                                "description": "Parametry przypięte do dania (wiele↔wiele).",
+                                                "type": "array",
+                                                "items": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 12
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Włoska"
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                                "category",
+                                                                "cuisine",
+                                                                "flavour",
+                                                                "other"
+                                                            ],
+                                                            "example": "cuisine"
+                                                        },
+                                                        "value": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 1
+                                                        },
+                                                        "is_active": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "created_at": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "example": "2025-10-08T12:34:56Z"
+                                            },
+                                            "updated_at": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "example": "2025-10-08T12:34:56Z"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/swipe-cards/{id}": {
+            "get": {
+                "tags": [
+                    "Swipes"
+                ],
+                "summary": "Pobierz karty do swipe’owania (nieswipe’owane dania z przypiętymi parametrami) według parametru.",
+                "description": "Zwraca losową listę nieswipe’owanych dań aktualnego użytkownika wraz z ich parametrami, według parametru.",
+                "operationId": "861a3e36b9c2b61be4d88cb334cf36f0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "Id parametru",
+                        "required": true,
                         "schema": {
                             "type": "integer",
                             "default": 5,
@@ -1731,16 +2051,16 @@
             "description": "Dishes"
         },
         {
+            "name": "Swipes",
+            "description": "Swipes"
+        },
+        {
             "name": "Parameters",
             "description": "Parameters"
         },
         {
             "name": "Recommendations",
             "description": "Recommendations"
-        },
-        {
-            "name": "Swipes",
-            "description": "Swipes"
         }
     ]
 }
