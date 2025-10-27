@@ -87,7 +87,6 @@ class RecommendationService
     public function recommendedDishes(User $user, int $perPage = 10): LengthAwarePaginator
     {
         $relevantTypes = ['category', 'cuisine', 'flavour', 'other'];
-
         $scores = DB::table('dish_parameters')
             ->join('parameters', 'parameters.id', '=', 'dish_parameters.parameter_id')
             ->leftJoin('parameter_weights', function ($join) use ($user) {
@@ -106,6 +105,7 @@ class RecommendationService
                 $join->on('scores.dish_id', '=', 'dishes.id');
             })
             ->where('scores.match_score', '>', 0)
+            ->when($user->vegan, fn ($q) => $q->where('dishes.is_vegan', true))
             ->orderByDesc('scores.match_score')
             ->with(['parameters' => function ($q) use ($relevantTypes) {
                 $q->select('parameters.id', 'name', 'type')

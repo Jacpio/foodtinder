@@ -86,6 +86,9 @@ class SwipeService
             ->when($swipedDishIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $swipedDishIds))
             ->whereHas('parameters', fn ($q) => $q->where('parameters.id', $parameterId));
 
+        if ($user->vegan) {
+            $base->where('is_vegan', true);
+        }
         $available = (clone $base)->count();
         $limit = max(0, min($limit, $available));
 
