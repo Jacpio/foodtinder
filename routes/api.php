@@ -13,5 +13,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/recommended-dishes', [RecommendationController::class, 'recommendation']);
 });
 
+Route::get('/share/recommendations', [RecommendationController::class, 'shareRecommendations']);
+
 require __DIR__.'/auth.php';
 require __DIR__.'/admin_api.php';

@@ -11,6 +11,7 @@ class ImportCSVParameter extends CSVImporter
     {
         if (!$uploaded->isValid()) {
             return false;
+
         }
         $reader = $this->getReader($uploaded);
         $delimiter = $this->getDelimiter($data);
@@ -25,6 +26,7 @@ class ImportCSVParameter extends CSVImporter
                 Parameter::create(['name' => $name, 'type' => $type, 'value' => $value, 'is_active' => $isActive]);
             });
         }catch (\Exception $e){
+            dump($e->getMessage());
             return false;
         }
 

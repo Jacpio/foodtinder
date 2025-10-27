@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Dish;
 use App\Services\RecommendationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class RecommendationController extends Controller
      *   path="/api/recommended-dishes",
      *   operationId="recommendation",
      *   tags={"Recommendations"},
-     *   summary="Rekomendacje dla użytkownika (paginowane)",
+     *   summary="Rekomendacje dla użytkownika",
      *   description="Zwraca paginowaną listę rekomendowanych dań z polem `match_score`.",
      *   security={{"bearerAuth": {}}},
      *   @OA\Parameter(
@@ -97,5 +98,58 @@ class RecommendationController extends Controller
         $paginator = $this->recommendationService->recommendedDishes($request->user(), $perPage, $page);
 
         return response()->json($paginator);
+    }
+    /**
+     * @OA\Get(
+     *   path="/api/share/recommendations",
+     *   tags={"Recommendations"},
+     *   summary="Pobierz dania przez id",
+     *   description="Zwraca listę dań, by udostępić ją.",
+     *   @OA\Parameter(
+     *     name="ids",
+     *     in="query",
+     *     required=true,
+     *     description="Oddzielone przecinkiem id dań",
+     *     @OA\Schema(type="string", pattern="^\\d+(,\\d+)*$", example="1,5,9")
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="OK",
+     *     @OA\JsonContent(
+     *       type="array",
+     *       @OA\Items(
+     *         type="object",
+     *         @OA\Property(property="id", type="integer", example=1),
+     *         @OA\Property(property="name", type="string", example="Spaghetti Bolognese"),
+     *         @OA\Property(property="description", type="string", nullable=true),
+     *         @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
+     *         @OA\Property(
+     *           property="parameters",
+     *           type="array",
+     *           @OA\Items(
+     *             type="object",
+     *             @OA\Property(property="id", type="integer", example=12),
+     *             @OA\Property(property="name", type="string", example="Włoska"),
+     *             @OA\Property(property="type", type="string", enum={"category","cuisine","flavour","other"}, example="cuisine"),
+     *             @OA\Property(property="value", type="number", format="float", example=1),
+     *             @OA\Property(property="is_active", type="boolean", example=true)
+     *           )
+     *         ),
+     *         @OA\Property(property="created_at", type="string", format="date-time"),
+     *         @OA\Property(property="updated_at", type="string", format="date-time")
+     *       )
+     *     )
+     *   ),
+     *   @OA\Response(response=404, description="Not Found")
+     * )
+     */
+    public function shareRecommendations(Request $request): JsonResponse{
+        $ids = $request->query('ids');
+        $ids = explode(',', $ids);
+        if (is_array($ids)) {
+            $dishes = Dish::with('parameters')->whereIn('id', $ids)->get();
+            return response()->json($dishes);
+        }
+        return response()->json(['message' => 'Not Found'], 404);
     }
 }
