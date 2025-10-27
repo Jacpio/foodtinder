@@ -30,7 +30,7 @@ class DishController extends Controller
      *   ),
      *   @OA\Response(
      *     response=200,
-     *     description="OK (paginacja Laravel: data + meta + links)",
+     *     description="Paginowane dań",
      *     @OA\JsonContent(
      *       type="object",
      *       @OA\Property(
@@ -42,6 +42,7 @@ class DishController extends Controller
      *           @OA\Property(property="name", type="string", example="Spaghetti Bolognese"),
      *           @OA\Property(property="description", type="string", nullable=true),
      *           @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
+     *           @OA\Property(property="is_vegan", type="boolean", example="false"),
      *           @OA\Property(
      *             property="parameters",
      *             type="array",
@@ -173,6 +174,7 @@ class DishController extends Controller
      *       @OA\Property(property="name", type="string", example="Pizza Margherita"),
      *       @OA\Property(property="description", type="string", nullable=true),
      *       @OA\Property(property="image_url", type="string", nullable=true),
+     *       @OA\Property(property="is_vegan", type="boolean", nullable=false),
      *       @OA\Property(
      *         property="parameters",
      *         type="array",
@@ -195,6 +197,7 @@ class DishController extends Controller
             'name'           => 'required|string|max:255',
             'description'    => 'nullable|string',
             'image'          => 'nullable|file|image|max:5120',
+            'is_vegan'       => 'nullable|boolean',
             'parameter_ids'  => 'nullable|array',
             'parameter_ids.*'=> 'integer|distinct|exists:parameters,id',
         ]);
@@ -274,6 +277,7 @@ class DishController extends Controller
             'name'           => 'sometimes|string|max:255',
             'description'    => 'sometimes|nullable|string',
             'remove_image'   => 'sometimes|boolean',
+            'is_vegan'       => 'sometimes|boolean',
             'image'          => 'sometimes|nullable|file|image|max:5120',
             'parameter_ids'  => 'sometimes|array',
             'parameter_ids.*'=> 'integer|distinct|exists:parameters,id',
@@ -292,6 +296,9 @@ class DishController extends Controller
             $dish->image_url = $request->file('image')->store('', 'public');
         }
 
+        if (array_key_exists('is_vegan', $data)) {
+            $dish->is_vegan = $data['is_vegan'];
+        }
         if (array_key_exists('name', $data)) {
             $dish->name = $data['name'];
         }
@@ -364,7 +371,7 @@ class DishController extends Controller
      *           property="file",
      *           type="string",
      *           format="binary",
-     *           description="Plik CSV (nagłówki: id,name,image_url,description)"
+     *           description="Plik CSV (nagłówki: id,name,image_url,description, isVegan)"
      *         ),
      *         @OA\Property(
      *           property="delimiter",

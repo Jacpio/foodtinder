@@ -23,9 +23,6 @@ beforeEach(function () {
     Sanctum::actingAs($this->admin, ['*']);
 });
 
-/**
- * Helper: create N parameters with rotating types.
- */
 function makeParameters(int $count = 3): Collection
 {
     $types = ['category','cuisine','flavour','other'];
@@ -53,6 +50,7 @@ it('GET /api/dish returns paginated list with parameters', function () {
                     'id',
                     'name',
                     'description',
+                    'is_vegan',
                     'image_url',
                     'parameters' => [
                         ['id','name','type','value','is_active'],
@@ -101,6 +99,7 @@ it('POST /api/dish (JSON) creates a dish and attaches parameters', function () {
     $payload = [
         'name' => 'Pizza Margherita',
         'description' => 'Classic',
+        'is_vegan' => true,
         'parameter_ids' => $p->pluck('id')->all(),
     ];
 
@@ -108,6 +107,7 @@ it('POST /api/dish (JSON) creates a dish and attaches parameters', function () {
 
     $res->assertCreated()
         ->assertJsonPath('name', 'Pizza Margherita')
+        ->assertJsonPath('is_vegan', true)
         ->assertJsonCount(3, 'parameters');
 
     $this->assertDatabaseHas('dishes', ['name' => 'Pizza Margherita']);

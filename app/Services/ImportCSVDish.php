@@ -21,13 +21,14 @@ class ImportCSVDish extends CSVImporter
                 $name = $row['name'];
                 $image_url = $row['image_url'];
                 $description = $row['description'];
-                Dish::create(['name' => $name, 'image_url' => $image_url, 'description' => $description]);
+                $is_vegan = $row['is_vegan'];
+                Dish::create(['name' => $name, 'image_url' => $image_url, 'description' => $description, 'is_vegan' => $is_vegan]);
             });
         }catch (\Exception $e){
             return false;
         }
 
-        $this->cloneReader($reader);
+        $this->closeReader($reader);
 
         return true;
     }

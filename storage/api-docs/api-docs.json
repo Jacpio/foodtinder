@@ -151,7 +151,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK (paginacja Laravel: data + meta + links)",
+                        "description": "Paginowane dań",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -176,6 +176,10 @@
                                                         "type": "string",
                                                         "example": "spaghetti.jpg",
                                                         "nullable": true
+                                                    },
+                                                    "is_vegan": {
+                                                        "type": "boolean",
+                                                        "example": "false"
                                                     },
                                                     "parameters": {
                                                         "type": "array",
@@ -331,6 +335,10 @@
                                         "image_url": {
                                             "type": "string",
                                             "nullable": true
+                                        },
+                                        "is_vegan": {
+                                            "type": "boolean",
+                                            "nullable": false
                                         },
                                         "parameters": {
                                             "type": "array",
@@ -637,7 +645,7 @@
                                 ],
                                 "properties": {
                                     "file": {
-                                        "description": "Plik CSV (nagłówki: id,name,image_url,description)",
+                                        "description": "Plik CSV (nagłówki: id,name,image_url,description, isVegan)",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -1468,6 +1476,10 @@
                                                 "example": "spaghetti.jpg",
                                                 "nullable": true
                                             },
+                                            "is_vegan": {
+                                                "type": "boolean",
+                                                "example": true
+                                            },
                                             "parameters": {
                                                 "description": "Parametry przypięte do dania (wiele↔wiele).",
                                                 "type": "array",
@@ -1580,6 +1592,10 @@
                                                 "type": "string",
                                                 "example": "spaghetti.jpg",
                                                 "nullable": true
+                                            },
+                                            "is_vegan": {
+                                                "type": "boolean",
+                                                "example": true
                                             },
                                             "parameters": {
                                                 "description": "Parametry przypięte do dania (wiele↔wiele).",
@@ -2039,6 +2055,10 @@
                         "type": "string",
                         "example": "Classic Roman pasta.",
                         "nullable": true
+                    },
+                    "is_vegan": {
+                        "type": "boolean",
+                        "example": "false"
                     }
                 },
                 "type": "object"

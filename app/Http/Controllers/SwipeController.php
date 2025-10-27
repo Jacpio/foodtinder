@@ -36,6 +36,7 @@ class SwipeController extends Controller
      *         @OA\Property(property="name", type="string", example="Spaghetti Bolognese"),
      *         @OA\Property(property="description", type="string", nullable=true, example="Klasyczny makaron z sosem pomidorowo-mięsnym."),
      *         @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
+     *         @OA\Property(property="is_vegan", type="boolean", example=true),
      *         @OA\Property(
      *           property="parameters",
      *           type="array",
@@ -95,6 +96,7 @@ class SwipeController extends Controller
      *         @OA\Property(property="name", type="string", example="Spaghetti Bolognese"),
      *         @OA\Property(property="description", type="string", nullable=true, example="Klasyczny makaron z sosem pomidorowo-mięsnym."),
      *         @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
+     *         @OA\Property(property="is_vegan", type="boolean", example=true),
      *         @OA\Property(
      *           property="parameters",
      *           type="array",

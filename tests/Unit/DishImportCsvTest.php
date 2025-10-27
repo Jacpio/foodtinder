@@ -51,7 +51,7 @@ it('POST /api/dish/import-csv – błąd z serwisu (422)', function () {
     $res->assertStatus(422)->assertJson(['message' => 'Bad data']);
 });
 
-it('POST /api/dish/import-csv – walidacja: brak pliku -> 422', function () {
+it('POST /api/dish/import-csv – brak pliku - 422', function () {
     $res = $this->post('/api/dish/import-csv', [
         'delimiter' => ',',
     ], ['Accept' => 'application/json']);

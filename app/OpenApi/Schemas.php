@@ -13,7 +13,8 @@ use OpenApi\Annotations as OA;
  *   @OA\Property(property="name", type="string", example="Spaghetti Carbonara"),
  *   @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
  *   @OA\Property(property="image_url_full", type="string", example="http://localhost/storage/spaghetti.jpg"),
- *   @OA\Property(property="description", type="string", nullable=true, example="Classic Roman pasta.")
+ *   @OA\Property(property="description", type="string", nullable=true, example="Classic Roman pasta."),
+ *   @OA\Property(property="is_vegan", type="boolean", example="false")
  * )
  *
  * @OA\Schema(

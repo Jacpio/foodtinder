@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
  * @property int $id
  * @property string $name
  * @property string|null $image_url
+ * @property int $is_vegan
  * @property string|null $description
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -30,6 +31,7 @@ use Illuminate\Support\Facades\Storage;
  * @method static Builder<static>|Dish whereDescription($value)
  * @method static Builder<static>|Dish whereId($value)
  * @method static Builder<static>|Dish whereImageUrl($value)
+ * @method static Builder<static>|Dish whereIsVegan($value)
  * @method static Builder<static>|Dish whereName($value)
  * @method static Builder<static>|Dish whereUpdatedAt($value)
  * @mixin \Eloquent

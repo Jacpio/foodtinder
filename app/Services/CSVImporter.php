@@ -26,7 +26,7 @@ class CSVImporter
             ->headersToSnakeCase()
             ->getRows();
     }
-    protected function cloneReader(SimpleExcelReader $reader):void{
+    protected function closeReader(SimpleExcelReader $reader):void{
         $reader->close();
     }
 }

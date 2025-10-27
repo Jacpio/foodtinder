@@ -30,7 +30,7 @@ class ImportCSVParameter extends CSVImporter
             return false;
         }
 
-        $this->cloneReader($reader);
+        $this->closeReader($reader);
 
         return true;
     }
