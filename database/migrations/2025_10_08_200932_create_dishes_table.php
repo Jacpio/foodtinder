@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('image_url')->nullable();
+            $table->boolean('is_vegan')->default(false);
             $table->string('description')->nullable();
             $table->timestamps();
         });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dish;
+use App\Models\User;
 use App\Services\SwipeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -181,7 +182,8 @@ class SwipeController extends Controller
             'decision' => 'required|string|in:like,dislike',
         ]);
 
-        $user = $request->user();
+        /**  @var User $user */
+         $user = $request->user();
 
         $dish = Dish::find($data['dish_id']);
         if (!$dish) {

@@ -16,11 +16,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $is_active
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Dish> $dishes
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Dish> $dishes
  * @property-read int|null $dishes_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ParameterWeight> $weights
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ParameterWeight> $weights
  * @property-read int|null $weights_count
  * @method static Builder<static>|Parameter active()
+ * @method static \Database\Factories\ParameterFactory factory($count = null, $state = [])
  * @method static Builder<static>|Parameter newModelQuery()
  * @method static Builder<static>|Parameter newQuery()
  * @method static Builder<static>|Parameter query()

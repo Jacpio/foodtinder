@@ -46,15 +46,23 @@ class SwipeService
     {
         $swipedDishIds = $user->likedDishes()->pluck('dishes.id');
 
-        $available = Dish::whereNotIn('id', $swipedDishIds)->count();
+        $base = Dish::query()
+            ->with('parameters')
+            ->whereNotIn('id', $swipedDishIds);
+
+        if ($user->vegan) {
+            $base->where('is_vegan', true);
+        }
+
+        $available = (clone $base)->count();
         $limit = max(0, min($limit, $available));
 
-        return Dish::with('parameters')
-            ->whereNotIn('id', $swipedDishIds)
-            ->inRandomOrder()
+        return $base->inRandomOrder()
             ->take($limit)
             ->get();
     }
+
+
 
     private function clamp(float $v, float $min, float $max): float
     {

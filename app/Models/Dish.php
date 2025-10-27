@@ -42,6 +42,7 @@ class Dish extends Model
         'name',
         'image_url',
         'description',
+        'is_vegan'
     ];
 
     public function parameters(): BelongsToMany
