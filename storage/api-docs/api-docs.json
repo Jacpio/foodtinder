@@ -1141,7 +1141,7 @@
                 "tags": [
                     "Recommendations"
                 ],
-                "summary": "Rekomendacje dla użytkownika (paginowane)",
+                "summary": "Rekomendacje dla użytkownika",
                 "description": "Zwraca paginowaną listę rekomendowanych dań z polem `match_score`.",
                 "operationId": "recommendation",
                 "parameters": [
@@ -1314,6 +1314,109 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/share/recommendations": {
+            "get": {
+                "tags": [
+                    "Recommendations"
+                ],
+                "summary": "Pobierz dania przez id",
+                "description": "Zwraca listę dań, by udostępić ją.",
+                "operationId": "eda58ece0c9f68d21fd2b19952c09257",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "query",
+                        "description": "Oddzielone przecinkiem id dań",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^\\\\d+(,\\\\d+)*$",
+                            "example": "1,5,9"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Spaghetti Bolognese"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "nullable": true
+                                            },
+                                            "image_url": {
+                                                "type": "string",
+                                                "example": "spaghetti.jpg",
+                                                "nullable": true
+                                            },
+                                            "parameters": {
+                                                "type": "array",
+                                                "items": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 12
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Włoska"
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                                "category",
+                                                                "cuisine",
+                                                                "flavour",
+                                                                "other"
+                                                            ],
+                                                            "example": "cuisine"
+                                                        },
+                                                        "value": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 1
+                                                        },
+                                                        "is_active": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "created_at": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            },
+                                            "updated_at": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
             }
         },
         "/api/swipe-cards": {
