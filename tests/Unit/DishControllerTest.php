@@ -2,6 +2,7 @@
 
 use App\Models\Dish;
 use App\Models\Parameter;
+use App\Models\Type;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -34,7 +35,7 @@ function makeParameters(int $count = 3): Collection
     });
 }
 
-it('GET /api/dish returns paginated list with parameters', function () {
+it('GET /api/dish zwraca paginowaną listę z parametrami', function () {
     $params = makeParameters(4);
 
     Dish::factory()->count(3)->create()->each(function (Dish $d) use ($params) {
@@ -53,7 +54,7 @@ it('GET /api/dish returns paginated list with parameters', function () {
                     'is_vegan',
                     'image_url',
                     'parameters' => [
-                        ['id','name','type','value','is_active'],
+                        ['id','name','type_id','value','is_active'],
                     ],
                 ],
             ],
@@ -74,7 +75,7 @@ it('GET /api/dish returns paginated list with parameters', function () {
     expect((int) $res->json('per_page'))->toBe(2);
 });
 
-it('GET /api/dish/{id} returns a dish with parameters', function () {
+it('GET /api/dish/{id} zwraca danie z parametrami', function () {
     $p = makeParameters(3);
     $dish = Dish::factory()->create();
     $dish->parameters()->sync($p->pluck('id')->all());
@@ -86,19 +87,19 @@ it('GET /api/dish/{id} returns a dish with parameters', function () {
         ->assertJsonCount(3, 'parameters');
 });
 
-it('GET /api/dish/{id} returns 404 for non-existing dish', function () {
+it('GET /api/dish/{id} zwraca 404 dla nieistniejącego dania', function () {
     $res = $this->getJson('/api/dish/999999');
 
     $res->assertStatus(404)
         ->assertJson(['message' => 'Not found']);
 });
 
-it('POST /api/dish (JSON) creates a dish and attaches parameters', function () {
+it('POST /api/dish (JSON) tworzy danie i przypina parametry', function () {
     $p = makeParameters(3);
 
     $payload = [
         'name' => 'Pizza Margherita',
-        'description' => 'Classic',
+        'description' => 'Klasyk',
         'is_vegan' => true,
         'parameter_ids' => $p->pluck('id')->all(),
     ];
@@ -122,7 +123,7 @@ it('POST /api/dish (JSON) creates a dish and attaches parameters', function () {
     }
 });
 
-it('POST /api/dish (multipart) uploads and stores an image', function () {
+it('POST /api/dish (multipart) wysyła i zapisuje obraz', function () {
     Storage::fake('public');
 
     $p = makeParameters(2);
@@ -130,8 +131,8 @@ it('POST /api/dish (multipart) uploads and stores an image', function () {
     $file = UploadedFile::fake()->image('photo.jpg', 100, 100);
 
     $payload = [
-        'name' => 'Cucumber Soup',
-        'description' => 'Classic',
+        'name' => 'Zupa ogórkowa',
+        'description' => 'Klasyk',
         'parameter_ids' => $p->pluck('id')->all(),
         'image' => $file,
     ];
@@ -146,10 +147,10 @@ it('POST /api/dish (multipart) uploads and stores an image', function () {
     Storage::disk('public')->assertExists($path);
 });
 
-it('PUT /api/dish/{id} updates fields and syncs parameters', function () {
+it('PUT /api/dish/{id} aktualizuje pola i synchronizuje parametry', function () {
     $dish = Dish::factory()->create([
-        'name' => 'Old name',
-        'description' => 'Old',
+        'name' => 'Stara nazwa',
+        'description' => 'Stary opis',
     ]);
 
     $oldParams = makeParameters(2);
@@ -158,14 +159,14 @@ it('PUT /api/dish/{id} updates fields and syncs parameters', function () {
     $newParams = makeParameters(2);
 
     $res = $this->putJson("/api/dish/{$dish->id}", [
-        'name' => 'New name',
-        'description' => 'New desc',
+        'name' => 'Nowa nazwa',
+        'description' => 'Nowy opis',
         'parameter_ids' => $newParams->pluck('id')->all(),
     ]);
 
     $res->assertOk()
-        ->assertJsonPath('name', 'New name')
-        ->assertJsonPath('description', 'New desc')
+        ->assertJsonPath('name', 'Nowa nazwa')
+        ->assertJsonPath('description', 'Nowy opis')
         ->assertJsonCount(2, 'parameters');
 
     foreach ($newParams as $param) {
@@ -183,13 +184,13 @@ it('PUT /api/dish/{id} updates fields and syncs parameters', function () {
     }
 });
 
-it('PUT /api/dish/{id} replaces image and supports remove_image', function () {
+it('PUT /api/dish/{id} podmienia obraz oraz obsługuje remove_image', function () {
     Storage::fake('public');
 
     $initial = UploadedFile::fake()->image('old.jpg');
 
     $create = $this->post('/api/dish', [
-        'name' => 'With image',
+        'name' => 'Z obrazkiem',
         'image' => $initial,
     ], ['Accept' => 'application/json'])->assertCreated();
 
@@ -216,13 +217,13 @@ it('PUT /api/dish/{id} replaces image and supports remove_image', function () {
     expect($update2->json('image_url'))->toBeNull();
 });
 
-it('DELETE /api/dish/{id} deletes dish and its file', function () {
+it('DELETE /api/dish/{id} usuwa danie i jego plik', function () {
     Storage::fake('public');
 
     $file = UploadedFile::fake()->image('del.jpg');
 
     $create = $this->post('/api/dish', [
-        'name' => 'To delete',
+        'name' => 'Do usunięcia',
         'image' => $file,
     ], ['Accept' => 'application/json'])->assertCreated();
 
@@ -238,7 +239,7 @@ it('DELETE /api/dish/{id} deletes dish and its file', function () {
     Storage::disk('public')->assertMissing($path);
 });
 
-it('DELETE /api/dish/{id} returns 422 for invalid id', function () {
+it('DELETE /api/dish/{id} zwraca 422 dla nieprawidłowego id', function () {
     $this->deleteJson('/api/dish/999999')
         ->assertStatus(422)
         ->assertJson(['message' => 'The given data was invalid.']);

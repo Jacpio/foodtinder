@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('parameters', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('type', ['cuisine','flavour','category','other'])->default('other');
+            $table->foreignId('type_id')->constrained('types')->cascadeOnDelete();
             $table->float('value')->unsigned()->default(1);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            $table->unique(['name']);
+            $table->unique(['name', 'type_id']);
         });
     }
 

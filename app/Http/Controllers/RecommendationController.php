@@ -19,17 +19,17 @@ class RecommendationController extends Controller
      *   path="/api/recommended-dishes",
      *   operationId="recommendation",
      *   tags={"Recommendations"},
-     *   summary="Rekomendacje dla użytkownika",
-     *   description="Zwraca paginowaną listę rekomendowanych dań z polem `match_score`.",
+     *   summary="User recommendations",
+     *   description="Returns a paginated list of recommended dishes for the authenticated user. Each item includes a `match_score` computed from user's parameter weights.",
      *   security={{"bearerAuth": {}}},
      *   @OA\Parameter(
      *     name="per_page", in="query", required=false,
-     *     description="Ilość na stronę (1–10, domyślnie 10)",
+     *     description="Items per page (1–10, default 10)",
      *     @OA\Schema(type="integer", minimum=1, maximum=10, default=10)
      *   ),
      *   @OA\Parameter(
      *     name="page", in="query", required=false,
-     *     description="Numer strony (>=1, domyślnie 1)",
+     *     description="Page number (>= 1, default 1)",
      *     @OA\Schema(type="integer", minimum=1, default=1)
      *   ),
      *   @OA\Response(
@@ -47,6 +47,7 @@ class RecommendationController extends Controller
      *           @OA\Property(property="name", type="string", example="Spaghetti Carbonara"),
      *           @OA\Property(property="description", type="string", nullable=true, example="Classic"),
      *           @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
+     *           @OA\Property(property="is_vegan", type="boolean", example=false),
      *           @OA\Property(
      *             property="parameters",
      *             type="array",
@@ -54,7 +55,12 @@ class RecommendationController extends Controller
      *               type="object",
      *               @OA\Property(property="id", type="integer", example=5),
      *               @OA\Property(property="name", type="string", example="Włoska"),
-     *               @OA\Property(property="type", type="string", enum={"category","cuisine","flavour","other"}, example="cuisine")
+     *               @OA\Property(
+     *                 property="type",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=2),
+     *                 @OA\Property(property="name", type="string", example="cuisine")
+     *               )
      *             )
      *           ),
      *           @OA\Property(property="match_score", type="number", format="float", example=6)
@@ -77,7 +83,7 @@ class RecommendationController extends Controller
      *       @OA\Property(property="next_page_url", type="string", nullable=true, example="http://localhost/api/recommended-dishes?page=2"),
      *       @OA\Property(property="path", type="string", example="http://localhost/api/recommended-dishes"),
      *       @OA\Property(property="per_page", type="integer", example=10),
-     *       @OA\Property(property="prev_page_url", type="string", nullable=true, example=null),
+     *       @OA\Property(property="prev_page_url", type="string", nullable=true),
      *       @OA\Property(property="to", type="integer", nullable=true, example=10),
      *       @OA\Property(property="total", type="integer", example=47)
      *     )
@@ -94,22 +100,22 @@ class RecommendationController extends Controller
 
         $perPage = (int) ($validated['per_page'] ?? 10);
 
-        $page = (int) ($validated['page'] ?? 1);
-        $paginator = $this->recommendationService->recommendedDishes($request->user(), $perPage, $page);
+        $paginator = $this->recommendationService->recommendedDishes($request->user(), $perPage);
 
         return response()->json($paginator);
     }
+
     /**
      * @OA\Get(
      *   path="/api/share/recommendations",
      *   tags={"Recommendations"},
-     *   summary="Pobierz dania przez id",
-     *   description="Zwraca listę dań, by udostępić ją.",
+     *   summary="Fetch dishes by IDs (public)",
+     *   description="Returns a list of dishes (with parameters and their types) for sharing. No authentication required.",
      *   @OA\Parameter(
      *     name="ids",
      *     in="query",
      *     required=true,
-     *     description="Oddzielone przecinkiem id dań",
+     *     description="Comma-separated dish IDs",
      *     @OA\Schema(type="string", pattern="^\\d+(,\\d+)*$", example="1,5,9")
      *   ),
      *   @OA\Response(
@@ -123,6 +129,7 @@ class RecommendationController extends Controller
      *         @OA\Property(property="name", type="string", example="Spaghetti Bolognese"),
      *         @OA\Property(property="description", type="string", nullable=true),
      *         @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
+     *         @OA\Property(property="is_vegan", type="boolean", example=false),
      *         @OA\Property(
      *           property="parameters",
      *           type="array",
@@ -130,9 +137,12 @@ class RecommendationController extends Controller
      *             type="object",
      *             @OA\Property(property="id", type="integer", example=12),
      *             @OA\Property(property="name", type="string", example="Włoska"),
-     *             @OA\Property(property="type", type="string", enum={"category","cuisine","flavour","other"}, example="cuisine"),
-     *             @OA\Property(property="value", type="number", format="float", example=1),
-     *             @OA\Property(property="is_active", type="boolean", example=true)
+     *             @OA\Property(
+     *               property="type",
+     *               type="object",
+     *               @OA\Property(property="id", type="integer", example=2),
+     *               @OA\Property(property="name", type="string", example="cuisine")
+     *             )
      *           )
      *         ),
      *         @OA\Property(property="created_at", type="string", format="date-time"),
@@ -143,13 +153,22 @@ class RecommendationController extends Controller
      *   @OA\Response(response=404, description="Not Found")
      * )
      */
-    public function shareRecommendations(Request $request): JsonResponse{
-        $ids = $request->query('ids');
-        $ids = explode(',', $ids);
-        if (is_array($ids)) {
-            $dishes = Dish::with('parameters')->whereIn('id', $ids)->get();
-            return response()->json($dishes);
+    public function shareRecommendations(Request $request): JsonResponse
+    {
+        $idsRaw = (string) $request->query('ids', '');
+        $ids = collect(explode(',', $idsRaw))
+            ->map(fn ($v) => trim($v))
+            ->filter(fn ($v) => $v !== '' && ctype_digit($v))
+            ->map(fn ($v) => (int) $v)
+            ->unique()
+            ->values();
+
+        if ($ids->isEmpty()) {
+            return response()->json([]);
         }
-        return response()->json(['message' => 'Not Found'], 404);
+
+        $dishes = Dish::with('parameters')->whereIn('id', $ids)->get();
+
+        return response()->json($dishes->values());
     }
 }

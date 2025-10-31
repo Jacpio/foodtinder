@@ -1,6 +1,7 @@
 <?php
 use App\Http\Controllers\DishController;
 use App\Http\Controllers\ParameterController;
+use App\Http\Controllers\TypeController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
@@ -21,5 +22,11 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::put('{id}', [ParameterController::class, 'update'])->whereNumber('id');
         Route::delete('{id}', [ParameterController::class, 'destroy'])->whereNumber('id');
     });
-
+    Route::prefix('types')->group(function () {
+        Route::get('/', [TypeController::class, 'index']);
+        Route::get('{id}', [TypeController::class, 'show'])->whereNumber('id');
+        Route::post('/', [TypeController::class, 'store']);
+        Route::put('{id}', [TypeController::class, 'update'])->whereNumber('id');
+        Route::delete('{id}', [TypeController::class, 'destroy'])->whereNumber('id');
+    });
 });

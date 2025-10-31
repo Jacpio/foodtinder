@@ -8,11 +8,11 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class SwipeService
 {
     /**
-     *
      * @param  'like'|'dislike'  $decision
      */
     public function swipe(User $user, Dish $dish, string $decision): void
@@ -23,7 +23,12 @@ class SwipeService
         }
 
         DB::transaction(function () use ($user, $dish, $decision) {
-            $user->likedDishes()->syncWithoutDetaching([$dish->id]);
+            if (method_exists($user, 'likedDishes')) {
+                $rel = $user->likedDishes();
+                if ($rel instanceof BelongsToMany) {
+                    $rel->syncWithoutDetaching([$dish->id]);
+                }
+            }
 
             $parameterIds = $dish->parameters()->pluck('parameters.id');
 
@@ -44,13 +49,19 @@ class SwipeService
 
     public function getUnswipedDishes(User $user, int $limit): Collection
     {
-        $swipedDishIds = $user->likedDishes()->pluck('dishes.id');
+        $swipedDishIds = collect();
+        if (method_exists($user, 'likedDishes')) {
+            $rel = $user->likedDishes();
+            if ($rel instanceof BelongsToMany) {
+                $swipedDishIds = $rel->pluck('dishes.id');
+            }
+        }
 
         $base = Dish::query()
             ->with('parameters')
-            ->whereNotIn('id', $swipedDishIds);
+            ->when($swipedDishIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $swipedDishIds));
 
-        if ($user->vegan) {
+        if ($user->vegan ?? false) {
             $base->where('is_vegan', true);
         }
 
@@ -62,22 +73,13 @@ class SwipeService
             ->get();
     }
 
-
-
-    private function clamp(float $v, float $min, float $max): float
-    {
-        return max($min, min($max, $v));
-    }
-
     public function getUnswipedDishesByParameter(?User $user, int $limit, int $parameterId): Collection
     {
         $swipedDishIds = collect();
-
-        if ($user) {
-            if (method_exists($user, 'swipes')) {
-                $swipedDishIds = $user->swipes()->pluck('dish_id');
-            } elseif (method_exists($user, 'likedDishes')) {
-                $swipedDishIds = $user->likedDishes()->pluck('dishes.id');
+        if ($user && method_exists($user, 'likedDishes')) {
+            $rel = $user->likedDishes();
+            if ($rel instanceof BelongsToMany) {
+                $swipedDishIds = $rel->pluck('dishes.id');
             }
         }
 
@@ -86,15 +88,18 @@ class SwipeService
             ->when($swipedDishIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $swipedDishIds))
             ->whereHas('parameters', fn ($q) => $q->where('parameters.id', $parameterId));
 
-        if ($user->vegan) {
+        if (($user->vegan ?? false) === true) {
             $base->where('is_vegan', true);
         }
+
         $available = (clone $base)->count();
         $limit = max(0, min($limit, $available));
 
-        return $base
-            ->inRandomOrder()
-            ->take($limit)
-            ->get();
+        return $base->inRandomOrder()->take($limit)->get();
+    }
+
+    private function clamp(float $v, float $min, float $max): float
+    {
+        return max($min, min($max, $v));
     }
 }

@@ -25,7 +25,7 @@ beforeEach(function () {
 test('imports parameters from CSV (comma delimiter)', function () {
     $csv = <<<CSV
                 Id,Name,Type,Value,IsActive
-                1,Zupy,category,1,1
+                1,Zupy,other,1,1
                 2,Włoska,cuisine,1,1
                 3,Słony,flavour,1,1
                 4,Sezonowe,other,0.5,0
@@ -39,9 +39,29 @@ test('imports parameters from CSV (comma delimiter)', function () {
     ]);
 
     $response->assertStatus(200)->assertJson(['message' => 'Success']);
+    expect(
+        Parameter::where('name', 'Zupy')->where('type', 'other')
+            ->exists()
+    )->toBeTrue()
+        ->and(
+            Parameter::where('name', 'Włoska')
+                ->whereHas('type', fn($q) => $q->where('name', 'cuisine'))
+                ->exists()
+        )->toBeTrue()
+        ->and(
+            Parameter::where('name', 'Słony')
+                ->whereHas('type', fn($q) => $q->where('name', 'flavour'))
+                ->exists()
+        )->toBeTrue();
 
-    expect(Parameter::where('name', 'Zupy')->where('type', 'category')->exists())->toBeTrue()
-        ->and(Parameter::where('name', 'Włoska')->where('type', 'cuisine')->exists())->toBeTrue()
+    $other = Parameter::where('name', 'Sezonowe')
+        ->whereHas('type', fn($q) => $q->where('name', 'other'))
+        ->first();
+    dump($other);
+    expect($other)->not->toBeNull()
+        ->and((float) $other->value)->toBe(0.5)
+        ->and((int) $other->is_active)->toBe(0)
+    ->and(Parameter::where('name', 'Włoska')->where('type', 'cuisine')->exists())->toBeTrue()
         ->and(Parameter::where('name', 'Słony')->where('type', 'flavour')->exists())->toBeTrue();
     $other = Parameter::where('name', 'Sezonowe')->where('type', 'other')->first();
     expect($other)->not->toBeNull()

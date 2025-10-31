@@ -11,41 +11,46 @@ use OpenApi\Annotations as OA;
 
 class SwipeController extends Controller
 {
-    public function __construct(private readonly SwipeService $swipeService){}
+    public function __construct(private readonly SwipeService $swipeService) {}
 
     /**
      * @OA\Get(
      *   path="/api/swipe-cards",
      *   tags={"Swipes"},
-     *   summary="Pobierz karty do swipe’owania (nieswipe’owane dania z przypiętymi parametrami)",
-     *   description="Zwraca losową listę nieswipe’owanych dań aktualnego użytkownika wraz z ich parametrami",
+     *   summary="Get swipeable cards (unswiped dishes with attached parameters)",
+     *   description="Returns a random list of the current user's unswiped dishes together with their parameters.",
      *   security={{"bearerAuth": {}}},
      *   @OA\Parameter(
      *     name="limit", in="query", required=false,
-     *     description="Ile kart zwrócić (1–10, domyślnie 5)",
+     *     description="How many cards to return (1–10, default 5)",
      *     @OA\Schema(type="integer", minimum=1, maximum=10, default=5)
      *   ),
      *   @OA\Response(
      *     response=200,
-     *     description="Lista dań",
+     *     description="List of dishes",
      *     @OA\JsonContent(
      *       type="array",
      *       @OA\Items(
      *         type="object",
      *         @OA\Property(property="id", type="integer", example=1),
      *         @OA\Property(property="name", type="string", example="Spaghetti Bolognese"),
-     *         @OA\Property(property="description", type="string", nullable=true, example="Klasyczny makaron z sosem pomidorowo-mięsnym."),
+     *         @OA\Property(property="description", type="string", nullable=true, example="Classic beef & tomato ragù."),
      *         @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
-     *         @OA\Property(property="is_vegan", type="boolean", example=true),
+     *         @OA\Property(property="is_vegan", type="boolean", example=false),
      *         @OA\Property(
      *           property="parameters",
      *           type="array",
-     *           description="Parametry przypięte do dania (wiele↔wiele).",
+     *           description="Dish parameters (many-to-many).",
      *           @OA\Items(
      *             type="object",
      *             @OA\Property(property="id", type="integer", example=12),
-     *             @OA\Property(property="name", type="string", example="Włoska"),
-     *             @OA\Property(property="type", type="string", enum={"category","cuisine","flavour","other"}, example="cuisine"),
+     *             @OA\Property(property="name", type="string", example="Italian"),
+     *             @OA\Property(
+     *               property="type",
+     *               type="object",
+     *               @OA\Property(property="id", type="integer", example=2),
+     *               @OA\Property(property="name", type="string", example="cuisine")
+     *             ),
      *             @OA\Property(property="value", type="number", format="float", example=1),
      *             @OA\Property(property="is_active", type="boolean", example=true)
      *           )
@@ -64,54 +69,63 @@ class SwipeController extends Controller
             'limit' => 'sometimes|integer|min:1|max:10',
         ]);
 
-        $user = $request->user();
+        /** @var User $user */
+        $user  = $request->user();
         $limit = $validated['limit'] ?? 5;
 
         $dishes = $this->swipeService->getUnswipedDishes($user, $limit);
 
         return response()->json($dishes);
     }
+
     /**
      * @OA\Get(
      *   path="/api/swipe-cards/{id}",
      *   tags={"Swipes"},
-     *   summary="Pobierz karty do swipe’owania (nieswipe’owane dania z przypiętymi parametrami) według parametru.",
-     *   description="Zwraca losową listę nieswipe’owanych dań aktualnego użytkownika wraz z ich parametrami, według parametru.",
+     *   summary="Get swipeable cards filtered by a parameter",
+     *   description="Returns a random list of the current user's unswiped dishes that contain the given parameter.",
      *   security={{"bearerAuth": {}}},
      *   @OA\Parameter(
+     *     name="id", in="path", required=true,
+     *     description="Parameter ID",
+     *     @OA\Schema(type="integer", minimum=1)
+     *   ),
+     *   @OA\Parameter(
      *     name="limit", in="query", required=false,
-     *     description="Ile kart zwrócić (1–10, domyślnie 5)",
-     *     name="id", in="query", required=true,
-     *     description="Id parametru",
+     *     description="How many cards to return (1–10, default 5)",
      *     @OA\Schema(type="integer", minimum=1, maximum=10, default=5)
      *   ),
      *   @OA\Response(
      *     response=200,
-     *     description="Lista dań",
+     *     description="List of dishes",
      *     @OA\JsonContent(
      *       type="array",
      *       @OA\Items(
      *         type="object",
      *         @OA\Property(property="id", type="integer", example=1),
-     *         @OA\Property(property="name", type="string", example="Spaghetti Bolognese"),
-     *         @OA\Property(property="description", type="string", nullable=true, example="Klasyczny makaron z sosem pomidorowo-mięsnym."),
-     *         @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
+     *         @OA\Property(property="name", type="string", example="Vegan Pad Thai"),
+     *         @OA\Property(property="description", type="string", nullable=true),
+     *         @OA\Property(property="image_url", type="string", nullable=true),
      *         @OA\Property(property="is_vegan", type="boolean", example=true),
      *         @OA\Property(
      *           property="parameters",
      *           type="array",
-     *           description="Parametry przypięte do dania (wiele↔wiele).",
      *           @OA\Items(
      *             type="object",
-     *             @OA\Property(property="id", type="integer", example=12),
-     *             @OA\Property(property="name", type="string", example="Włoska"),
-     *             @OA\Property(property="type", type="string", enum={"category","cuisine","flavour","other"}, example="cuisine"),
+     *             @OA\Property(property="id", type="integer", example=44),
+     *             @OA\Property(property="name", type="string", example="Thai"),
+     *             @OA\Property(
+     *               property="type",
+     *               type="object",
+     *               @OA\Property(property="id", type="integer", example=2),
+     *               @OA\Property(property="name", type="string", example="cuisine")
+     *             ),
      *             @OA\Property(property="value", type="number", format="float", example=1),
      *             @OA\Property(property="is_active", type="boolean", example=true)
      *           )
      *         ),
-     *         @OA\Property(property="created_at", type="string", format="date-time", example="2025-10-08T12:34:56Z"),
-     *         @OA\Property(property="updated_at", type="string", format="date-time", example="2025-10-08T12:34:56Z")
+     *         @OA\Property(property="created_at", type="string", format="date-time"),
+     *         @OA\Property(property="updated_at", type="string", format="date-time")
      *       )
      *     )
      *   ),
@@ -122,22 +136,27 @@ class SwipeController extends Controller
     {
         $validated = $request->validate([
             'limit' => 'sometimes|integer|min:1|max:10',
-            'id' => 'sometimes|integer|exists:parameter,id',
         ]);
 
-        $user = $request->user();
+        \Validator::validate(['id' => $id], [
+            'id' => 'required|integer|exists:parameters,id',
+        ]);
+
+        /** @var User $user */
+        $user  = $request->user();
         $limit = $validated['limit'] ?? 5;
 
         $dishes = $this->swipeService->getUnswipedDishesByParameter($user, $limit, $id);
 
         return response()->json($dishes);
     }
+
     /**
      * @OA\Post(
      *   path="/api/swipe-decision",
      *   tags={"Swipes"},
-     *   summary="Zapisz decyzję swipe (like/dislike) i zaktualizuj wagi parametrów",
-     *   description="Aktualizuje wagi użytkownika (ParameterWeight) dla wszystkich parametrów przypiętych do dania. Dodatkowo zapisuje swipe (pivot swipes).",
+     *   summary="Save swipe decision (like/dislike) and update parameter weights",
+     *   description="Updates the user's ParameterWeight for all parameters attached to the dish. Also records the swipe.",
      *   security={{"bearerAuth": {}}},
      *   @OA\RequestBody(
      *     required=true,
@@ -149,21 +168,21 @@ class SwipeController extends Controller
      *   ),
      *   @OA\Response(
      *     response=200,
-     *     description="Zapisano",
+     *     description="Saved",
      *     @OA\JsonContent(type="object",
      *       @OA\Property(property="message", type="string", example="success")
      *     )
      *   ),
      *   @OA\Response(
      *     response=404,
-     *     description="Nie znaleziono dania",
+     *     description="Dish not found",
      *     @OA\JsonContent(type="object",
      *       @OA\Property(property="message", type="string", example="Dish not found")
      *     )
      *   ),
      *   @OA\Response(
      *     response=422,
-     *     description="Błąd walidacji",
+     *     description="Validation error",
      *     @OA\JsonContent(
      *       type="object",
      *       @OA\Property(property="message", type="string", example="The given data was invalid."),
@@ -184,8 +203,8 @@ class SwipeController extends Controller
             'decision' => 'required|string|in:like,dislike',
         ]);
 
-        /**  @var User $user */
-         $user = $request->user();
+        /** @var User $user */
+        $user = $request->user();
 
         $dish = Dish::find($data['dish_id']);
         if (!$dish) {

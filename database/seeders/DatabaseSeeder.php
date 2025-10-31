@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Dish;
 use App\Models\Parameter;
 use App\Models\ParameterWeight;
+use App\Models\Type;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
@@ -19,24 +20,32 @@ class DatabaseSeeder extends Seeder
         $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'api']);
         Role::firstOrCreate(['name' => 'user', 'guard_name' => 'api']);
 
+
         $user = User::firstOrCreate(
             ['email' => 'test@example.com'],
             ['name' => 'Test User', 'password' => bcrypt('password')]
         );
         $user->assignRole($adminRole);
 
+        $types = Type::whereIn('name', ['category','cuisine','flavour','other'])
+            ->pluck('id', 'name');
+
+        $categoryTypeId = $types['category'] ?? null;
+        $cuisineTypeId  = $types['cuisine']  ?? null;
+        $flavourTypeId  = $types['flavour']  ?? null;
+
         $categories = ['Zupy','Dania główne','Desery','Przekąski'];
         $cuisines   = ['Włoska','Polska','Azjatycka','Meksykańska','Hiszpańska','Amerykańska','Indyjska'];
         $flavours   = ['Słodki','Kwaśny','Słony','Gorzki'];
 
-        $categoryParams = [];
-        $cuisineParams  = [];
-        $flavourParams  = [];
-        $allParameterIds = [];
+        $categoryParams   = [];
+        $cuisineParams    = [];
+        $flavourParams    = [];
+        $allParameterIds  = [];
 
         foreach ($categories as $name) {
             $p = Parameter::firstOrCreate(
-                ['name' => $name, 'type' => 'category'],
+                ['name' => $name, 'type_id' => $categoryTypeId],
                 ['value' => 1, 'is_active' => true]
             );
             $categoryParams[$name] = $p->id;
@@ -45,7 +54,7 @@ class DatabaseSeeder extends Seeder
 
         foreach ($cuisines as $name) {
             $p = Parameter::firstOrCreate(
-                ['name' => $name, 'type' => 'cuisine'],
+                ['name' => $name, 'type_id' => $cuisineTypeId],
                 ['value' => 1, 'is_active' => true]
             );
             $cuisineParams[$name]  = $p->id;
@@ -54,7 +63,7 @@ class DatabaseSeeder extends Seeder
 
         foreach ($flavours as $name) {
             $p = Parameter::firstOrCreate(
-                ['name' => $name, 'type' => 'flavour'],
+                ['name' => $name, 'type_id' => $flavourTypeId],
                 ['value' => 1, 'is_active' => true]
             );
             $flavourParams[$name]  = $p->id;
@@ -151,7 +160,7 @@ class DatabaseSeeder extends Seeder
                 [
                     'description' => $row['description'] ?? '',
                     'image_url'   => $row['image_url'] ?? null,
-                    'is_vegan' => $row['is_vegan'] ?? 0,
+                    'is_vegan'    => (bool)($row['is_vegan'] ?? false),
                 ]
             );
 

@@ -13,16 +13,15 @@ use OpenApi\Annotations as OA;
 
 class DishController extends Controller
 {
-    public function __construct(private readonly ImportCSVDish $CSVDish)
-    {
-    }
+    public function __construct(private readonly ImportCSVDish $CSVDish) {}
 
     /**
      * @OA\Get(
-     *   path="/api/dishes",
+     *   path="/api/dish",
      *   tags={"Dishes"},
      *   security={{"bearerAuth": {}}},
      *   summary="Lista potraw (z parametrami)",
+     *   description="Zwraca paginowaną listę dań z przypiętymi parametrami.",
      *   @OA\Parameter(
      *     name="per_page", in="query", required=false,
      *     description="Paginacja (1–100, domyślnie 10)",
@@ -30,7 +29,7 @@ class DishController extends Controller
      *   ),
      *   @OA\Response(
      *     response=200,
-     *     description="Paginowane dań",
+     *     description="Paginowana lista dań",
      *     @OA\JsonContent(
      *       type="object",
      *       @OA\Property(
@@ -42,7 +41,7 @@ class DishController extends Controller
      *           @OA\Property(property="name", type="string", example="Spaghetti Bolognese"),
      *           @OA\Property(property="description", type="string", nullable=true),
      *           @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
-     *           @OA\Property(property="is_vegan", type="boolean", example="false"),
+     *           @OA\Property(property="is_vegan", type="boolean", example=false),
      *           @OA\Property(
      *             property="parameters",
      *             type="array",
@@ -50,7 +49,7 @@ class DishController extends Controller
      *               type="object",
      *               @OA\Property(property="id", type="integer", example=12),
      *               @OA\Property(property="name", type="string", example="Włoska"),
-     *               @OA\Property(property="type", type="string", enum={"category","cuisine","flavour","other"}, example="cuisine"),
+     *               @OA\Property(property="type_id", type="integer", example=2),
      *               @OA\Property(property="value", type="number", format="float", example=1),
      *               @OA\Property(property="is_active", type="boolean", example=true)
      *             )
@@ -69,19 +68,20 @@ class DishController extends Controller
             $validated = \Validator::validate($request->all(), [
                 'per_page' => 'integer|min:1|max:100|nullable',
             ]);
-            $perPage = $validated['per_page'] ?? 10;
+            $perPage = (int)($validated['per_page'] ?? 10);
 
-            $page = Dish::with('parameters')->paginate((int)$perPage);
+            // Nie ładujemy relacji 'type', testy oczekują tylko type_id.
+            $page = Dish::with('parameters')->paginate($perPage);
 
             return response()->json($page);
         } catch (ValidationException $e) {
-            return response()->json(['error' => 'Validation failed'], 422);
+            return response()->json(['message' => 'The given data was invalid.', 'errors' => $e->errors()], 422);
         }
     }
 
     /**
      * @OA\Get(
-     *   path="/api/dishes/{id}",
+     *   path="/api/dish/{id}",
      *   tags={"Dishes"},
      *   security={{"bearerAuth": {}}},
      *   summary="Pokaż jedną potrawę (z parametrami)",
@@ -95,6 +95,7 @@ class DishController extends Controller
      *       @OA\Property(property="name", type="string", example="Spaghetti Bolognese"),
      *       @OA\Property(property="description", type="string", nullable=true),
      *       @OA\Property(property="image_url", type="string", nullable=true, example="spaghetti.jpg"),
+     *       @OA\Property(property="is_vegan", type="boolean", example=false),
      *       @OA\Property(
      *         property="parameters",
      *         type="array",
@@ -102,7 +103,7 @@ class DishController extends Controller
      *           type="object",
      *           @OA\Property(property="id", type="integer", example=12),
      *           @OA\Property(property="name", type="string", example="Włoska"),
-     *           @OA\Property(property="type", type="string", enum={"category","cuisine","flavour","other"}, example="cuisine"),
+     *           @OA\Property(property="type_id", type="integer", example=2),
      *           @OA\Property(property="value", type="number", format="float", example=1),
      *           @OA\Property(property="is_active", type="boolean", example=true)
      *         )
@@ -125,7 +126,7 @@ class DishController extends Controller
 
     /**
      * @OA\Post(
-     *   path="/api/dishes",
+     *   path="/api/dish",
      *   tags={"Dishes"},
      *   summary="Utwórz nową potrawę",
      *   security={{"bearerAuth": {}}},
@@ -138,11 +139,12 @@ class DishController extends Controller
      *         required={"name"},
      *         @OA\Property(property="name", type="string", example="Pizza Margherita"),
      *         @OA\Property(property="description", type="string", nullable=true, example="Klasyk"),
+     *         @OA\Property(property="is_vegan", type="boolean", example=false),
      *         @OA\Property(
      *           property="parameter_ids",
      *           type="array",
      *           @OA\Items(type="integer", example=1),
-     *           description="ID parametrów do przypięcia (category/cuisine/flavour/other)"
+     *           description="ID parametrów do przypięcia"
      *         )
      *       )
      *     ),
@@ -152,6 +154,7 @@ class DishController extends Controller
      *         required={"name"},
      *         @OA\Property(property="name", type="string", example="Pizza Margherita"),
      *         @OA\Property(property="description", type="string", nullable=true, example="Klasyk"),
+     *         @OA\Property(property="is_vegan", type="boolean", example=false),
      *         @OA\Property(
      *           property="parameter_ids[]",
      *           type="array",
@@ -174,7 +177,7 @@ class DishController extends Controller
      *       @OA\Property(property="name", type="string", example="Pizza Margherita"),
      *       @OA\Property(property="description", type="string", nullable=true),
      *       @OA\Property(property="image_url", type="string", nullable=true),
-     *       @OA\Property(property="is_vegan", type="boolean", nullable=false),
+     *       @OA\Property(property="is_vegan", type="boolean", example=false),
      *       @OA\Property(
      *         property="parameters",
      *         type="array",
@@ -182,7 +185,7 @@ class DishController extends Controller
      *           type="object",
      *           @OA\Property(property="id", type="integer"),
      *           @OA\Property(property="name", type="string"),
-     *           @OA\Property(property="type", type="string", enum={"category","cuisine","flavour","other"})
+     *           @OA\Property(property="type_id", type="integer")
      *         )
      *       )
      *     )
@@ -222,7 +225,7 @@ class DishController extends Controller
 
     /**
      * @OA\Put(
-     *   path="/api/dishes/{id}",
+     *   path="/api/dish/{id}",
      *   tags={"Dishes"},
      *   summary="Zaktualizuj potrawę",
      *   security={{"bearerAuth": {}}},
@@ -235,6 +238,7 @@ class DishController extends Controller
      *       @OA\Schema(
      *         @OA\Property(property="name", type="string"),
      *         @OA\Property(property="description", type="string", nullable=true),
+     *         @OA\Property(property="is_vegan", type="boolean", example=false),
      *         @OA\Property(property="remove_image", type="boolean", example=false),
      *         @OA\Property(
      *           property="parameter_ids",
@@ -249,6 +253,7 @@ class DishController extends Controller
      *       @OA\Schema(
      *         @OA\Property(property="name", type="string"),
      *         @OA\Property(property="description", type="string", nullable=true),
+     *         @OA\Property(property="is_vegan", type="boolean", example=false),
      *         @OA\Property(property="remove_image", type="boolean", example=false),
      *         @OA\Property(
      *           property="parameter_ids[]",
@@ -283,7 +288,6 @@ class DishController extends Controller
             'parameter_ids.*'=> 'integer|distinct|exists:parameters,id',
         ]);
 
-
         if (!empty($data['remove_image']) && $dish->image_url) {
             Storage::disk('public')->delete($dish->image_url);
             $dish->image_url = null;
@@ -296,14 +300,10 @@ class DishController extends Controller
             $dish->image_url = $request->file('image')->store('', 'public');
         }
 
-        if (array_key_exists('is_vegan', $data)) {
-            $dish->is_vegan = $data['is_vegan'];
-        }
-        if (array_key_exists('name', $data)) {
-            $dish->name = $data['name'];
-        }
-        if (array_key_exists('description', $data)) {
-            $dish->description = $data['description'];
+        foreach (['is_vegan', 'name', 'description'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $dish->{$field} = $data[$field];
+            }
         }
 
         $dish->save();
@@ -319,7 +319,7 @@ class DishController extends Controller
 
     /**
      * @OA\Delete(
-     *   path="/api/dishes/{id}",
+     *   path="/api/dish/{id}",
      *   tags={"Dishes"},
      *   summary="Usuń potrawę",
      *   security={{"bearerAuth": {}}},
@@ -338,21 +338,28 @@ class DishController extends Controller
     public function destroy(int $id): JsonResponse
     {
         try {
-            $validated = \Validator::validate(['id' => $id], [
+            \Validator::validate(['id' => $id], [
                 'id' => 'required|exists:dishes,id',
             ]);
         } catch (ValidationException $e) {
-            return response()->json(['message' => 'The given data was invalid.'], 422);
+            return response()->json(['message' => 'The given data was invalid.', 'errors' => $e->errors()], 422);
         }
 
-        $dish = Dish::find($validated['id']);
+        $dish = Dish::find($id);
+
+        if (method_exists($dish, 'parameters')) {
+            $dish->parameters()->detach();
+        }
+
         if ($dish->image_url) {
             Storage::disk('public')->delete($dish->image_url);
         }
+
         $dish->delete();
 
         return response()->json(['message' => 'Success'], 200);
     }
+
     /**
      * @OA\Post(
      *   path="/api/dish/import-csv",
@@ -371,7 +378,7 @@ class DishController extends Controller
      *           property="file",
      *           type="string",
      *           format="binary",
-     *           description="Plik CSV (nagłówki: id,name,image_url,description, isVegan)"
+     *           description="Plik CSV (nagłówki: id,name,image_url,description,is_vegan)"
      *         ),
      *         @OA\Property(
      *           property="delimiter",
@@ -399,12 +406,15 @@ class DishController extends Controller
      */
     public function importCSV(CSVRequest $request): JsonResponse
     {
-        $data =  $request->validated();
+        $data     = $request->validated();
         $uploaded = $request->file('file');
+
         $status = $this->CSVDish->createDishByFile($uploaded, $data);
+
         if (!$status) {
             return response()->json(['message' => 'Bad data'], 422);
         }
+
         return response()->json(['message' => 'Success'], 200);
     }
 }
