@@ -11,6 +11,71 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use OpenApi\Annotations as OA;
 
+/**
+ *
+ * @OA\Schema(
+ *   schema="Parameter",
+ *   description="Parametr dania z odwołaniem do typu",
+ *   type="object",
+ *   required={"id","name","type_id","value","is_active"},
+ *   @OA\Property(property="id", type="integer", example=1),
+ *   @OA\Property(property="name", type="string", example="Włoska"),
+ *   @OA\Property(property="type_id", type="integer", example=2, description="FK do tabeli types"),
+ *   @OA\Property(property="value", type="number", format="float", example=1),
+ *   @OA\Property(property="is_active", type="boolean", example=true),
+ *   @OA\Property(property="created_at", type="string", format="date-time", nullable=true),
+ *   @OA\Property(property="updated_at", type="string", format="date-time", nullable=true),
+ *   @OA\Property(
+ *     property="type",
+ *     ref="#/components/schemas/Type",
+ *     nullable=true,
+ *     description="Zagnieżdżony obiekt typu (jeśli został załadowany eager-loadem)"
+ *   ),
+ *   @OA\Property(
+ *     property="type_name",
+ *     type="string",
+ *     nullable=true,
+ *     example="cuisine",
+ *     description="Wygodny alias na type.name (opcjonalny, jeśli go wystawiasz)"
+ *   )
+ * )
+ *
+ * @OA\Schema(
+ *   schema="PaginationLink",
+ *   description="Element paginacji Laravela",
+ *   type="object",
+ *   @OA\Property(property="url", type="string", nullable=true, example="http://localhost/api/parameter?page=2"),
+ *   @OA\Property(property="label", type="string", example="2"),
+ *   @OA\Property(property="active", type="boolean", example=false)
+ * )
+ *
+ * @OA\Schema(
+ *   schema="PaginatedParameters",
+ *   description="Strona wyników z listą parametrów",
+ *   type="object",
+ *   @OA\Property(property="current_page", type="integer", example=1),
+ *   @OA\Property(
+ *     property="data",
+ *     type="array",
+ *     @OA\Items(ref="#/components/schemas/Parameter")
+ *   ),
+ *   @OA\Property(property="first_page_url", type="string", example="http://localhost/api/parameter?page=1"),
+ *   @OA\Property(property="from", type="integer", nullable=true, example=1),
+ *   @OA\Property(property="last_page", type="integer", example=5),
+ *   @OA\Property(property="last_page_url", type="string", example="http://localhost/api/parameter?page=5"),
+ *   @OA\Property(
+ *     property="links",
+ *     type="array",
+ *     @OA\Items(ref="#/components/schemas/PaginationLink")
+ *   ),
+ *   @OA\Property(property="next_page_url", type="string", nullable=true, example="http://localhost/api/parameter?page=2"),
+ *   @OA\Property(property="path", type="string", example="http://localhost/api/parameter"),
+ *   @OA\Property(property="per_page", type="integer", example=10),
+ *   @OA\Property(property="prev_page_url", type="string", nullable=true, example=null),
+ *   @OA\Property(property="to", type="integer", nullable=true, example=10),
+ *   @OA\Property(property="total", type="integer", example=47)
+ * )
+ */
 class ParameterController extends Controller
 {
     public function __construct(private readonly ImportCSVParameter $CSVParameter) {}

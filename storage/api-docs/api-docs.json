@@ -128,13 +128,14 @@
                 ]
             }
         },
-        "/api/dishes": {
+        "/api/dish": {
             "get": {
                 "tags": [
                     "Dishes"
                 ],
                 "summary": "Lista potraw (z parametrami)",
-                "operationId": "ddf841d9ba35d917bd22a504c13b2f72",
+                "description": "Zwraca paginowaną listę dań z przypiętymi parametrami.",
+                "operationId": "c6ed095fc9c3a40a7aea0299cb01f933",
                 "parameters": [
                     {
                         "name": "per_page",
@@ -151,7 +152,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Paginowane dań",
+                        "description": "Paginowana lista dań",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -179,7 +180,7 @@
                                                     },
                                                     "is_vegan": {
                                                         "type": "boolean",
-                                                        "example": "false"
+                                                        "example": false
                                                     },
                                                     "parameters": {
                                                         "type": "array",
@@ -193,15 +194,9 @@
                                                                     "type": "string",
                                                                     "example": "Włoska"
                                                                 },
-                                                                "type": {
-                                                                    "type": "string",
-                                                                    "enum": [
-                                                                        "category",
-                                                                        "cuisine",
-                                                                        "flavour",
-                                                                        "other"
-                                                                    ],
-                                                                    "example": "cuisine"
+                                                                "type_id": {
+                                                                    "type": "integer",
+                                                                    "example": 2
                                                                 },
                                                                 "value": {
                                                                     "type": "number",
@@ -246,7 +241,7 @@
                     "Dishes"
                 ],
                 "summary": "Utwórz nową potrawę",
-                "operationId": "3fc0252a7de74dac3747d26739c844cb",
+                "operationId": "e7d341cf37c275d1fb731b5f22e4b3a6",
                 "requestBody": {
                     "description": "Wspiera JSON oraz multipart/form-data. Dołącz `parameter_ids[]` aby przypiąć parametry.",
                     "required": true,
@@ -266,8 +261,12 @@
                                         "example": "Klasyk",
                                         "nullable": true
                                     },
+                                    "is_vegan": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
                                     "parameter_ids": {
-                                        "description": "ID parametrów do przypięcia (category/cuisine/flavour/other)",
+                                        "description": "ID parametrów do przypięcia",
                                         "type": "array",
                                         "items": {
                                             "type": "integer",
@@ -292,6 +291,10 @@
                                         "type": "string",
                                         "example": "Klasyk",
                                         "nullable": true
+                                    },
+                                    "is_vegan": {
+                                        "type": "boolean",
+                                        "example": false
                                     },
                                     "parameter_ids[]": {
                                         "description": "ID parametrów do przypięcia",
@@ -338,7 +341,7 @@
                                         },
                                         "is_vegan": {
                                             "type": "boolean",
-                                            "nullable": false
+                                            "example": false
                                         },
                                         "parameters": {
                                             "type": "array",
@@ -350,14 +353,8 @@
                                                     "name": {
                                                         "type": "string"
                                                     },
-                                                    "type": {
-                                                        "type": "string",
-                                                        "enum": [
-                                                            "category",
-                                                            "cuisine",
-                                                            "flavour",
-                                                            "other"
-                                                        ]
+                                                    "type_id": {
+                                                        "type": "integer"
                                                     }
                                                 },
                                                 "type": "object"
@@ -383,13 +380,13 @@
                 ]
             }
         },
-        "/api/dishes/{id}": {
+        "/api/dish/{id}": {
             "get": {
                 "tags": [
                     "Dishes"
                 ],
                 "summary": "Pokaż jedną potrawę (z parametrami)",
-                "operationId": "07b6fe7c8dc79b35e66b58956b97b893",
+                "operationId": "8752c0b427722e03594f2e46435c63bf",
                 "parameters": [
                     {
                         "name": "id",
@@ -424,6 +421,10 @@
                                             "example": "spaghetti.jpg",
                                             "nullable": true
                                         },
+                                        "is_vegan": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "parameters": {
                                             "type": "array",
                                             "items": {
@@ -436,15 +437,9 @@
                                                         "type": "string",
                                                         "example": "Włoska"
                                                     },
-                                                    "type": {
-                                                        "type": "string",
-                                                        "enum": [
-                                                            "category",
-                                                            "cuisine",
-                                                            "flavour",
-                                                            "other"
-                                                        ],
-                                                        "example": "cuisine"
+                                                    "type_id": {
+                                                        "type": "integer",
+                                                        "example": 2
                                                     },
                                                     "value": {
                                                         "type": "number",
@@ -488,7 +483,7 @@
                     "Dishes"
                 ],
                 "summary": "Zaktualizuj potrawę",
-                "operationId": "52b7975eeaea935e1251d215f5ac6bb4",
+                "operationId": "429651375416801d92426feb5838bd41",
                 "parameters": [
                     {
                         "name": "id",
@@ -512,6 +507,10 @@
                                     "description": {
                                         "type": "string",
                                         "nullable": true
+                                    },
+                                    "is_vegan": {
+                                        "type": "boolean",
+                                        "example": false
                                     },
                                     "remove_image": {
                                         "type": "boolean",
@@ -537,6 +536,10 @@
                                     "description": {
                                         "type": "string",
                                         "nullable": true
+                                    },
+                                    "is_vegan": {
+                                        "type": "boolean",
+                                        "example": false
                                     },
                                     "remove_image": {
                                         "type": "boolean",
@@ -585,7 +588,7 @@
                     "Dishes"
                 ],
                 "summary": "Usuń potrawę",
-                "operationId": "57bb2309cba8e67241d5d84d8ceb6beb",
+                "operationId": "21511d45f72d655fc0fe476e88160584",
                 "parameters": [
                     {
                         "name": "id",
@@ -645,7 +648,7 @@
                                 ],
                                 "properties": {
                                     "file": {
-                                        "description": "Plik CSV (nagłówki: id,name,image_url,description, isVegan)",
+                                        "description": "Plik CSV (nagłówki: id,name,image_url,description,is_vegan)",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -750,13 +753,13 @@
                 ]
             }
         },
-        "/api/parameters": {
+        "/api/parameter": {
             "get": {
                 "tags": [
                     "Parameters"
                 ],
                 "summary": "Lista parametrów (paginowana)",
-                "operationId": "f4e45c6fb51bf003fed04ddc487a4c1e",
+                "operationId": "9baa1f1589e909c69bf24fdc32503f03",
                 "parameters": [
                     {
                         "name": "per_page",
@@ -805,20 +808,19 @@
                     "Parameters"
                 ],
                 "summary": "Utwórz nowy parametr",
-                "operationId": "c7ffaec53fe69621c6e91a3761d80706",
+                "operationId": "a52d3e526ac1f8c13446cfaf1c19051f",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "name",
-                                    "type"
+                                    "name"
                                 ],
                                 "properties": {
                                     "name": {
                                         "type": "string",
-                                        "example": "Włoska"
+                                        "example": "Zupy"
                                     },
                                     "type": {
                                         "type": "string",
@@ -828,7 +830,12 @@
                                             "flavour",
                                             "other"
                                         ],
-                                        "example": "cuisine"
+                                        "example": "category"
+                                    },
+                                    "type_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
                                     },
                                     "value": {
                                         "type": "number",
@@ -880,13 +887,13 @@
                 ]
             }
         },
-        "/api/parameters/{id}": {
+        "/api/parameter/{id}": {
             "get": {
                 "tags": [
                     "Parameters"
                 ],
                 "summary": "Szczegóły parametru",
-                "operationId": "5c91e020d20799665978c008acbe8025",
+                "operationId": "b599774372bbdd8ad16313be03be6a00",
                 "parameters": [
                     {
                         "name": "id",
@@ -930,7 +937,7 @@
                     "Parameters"
                 ],
                 "summary": "Aktualizuj parametr",
-                "operationId": "5df579f997be1636e52db7f97396a143",
+                "operationId": "fe8a8ba06aeefcea70904d39f9421bdd",
                 "parameters": [
                     {
                         "name": "id",
@@ -942,14 +949,12 @@
                     }
                 ],
                 "requestBody": {
-                    "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
                                     "name": {
-                                        "type": "string",
-                                        "example": "Polska"
+                                        "type": "string"
                                     },
                                     "type": {
                                         "type": "string",
@@ -960,14 +965,16 @@
                                             "other"
                                         ]
                                     },
+                                    "type_id": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
                                     "value": {
                                         "type": "number",
-                                        "format": "float",
-                                        "example": 1
+                                        "format": "float"
                                     },
                                     "is_active": {
-                                        "type": "boolean",
-                                        "example": true
+                                        "type": "boolean"
                                     }
                                 },
                                 "type": "object"
@@ -986,31 +993,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthenticated"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
                     "404": {
-                        "description": "Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/MessageResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ValidationError"
-                                }
-                            }
-                        }
+                        "description": "Not Found"
                     }
                 },
                 "security": [
@@ -1024,7 +1008,7 @@
                     "Parameters"
                 ],
                 "summary": "Usuń parametr",
-                "operationId": "4c93fec8f46609f0a8a3b85e8fa4d755",
+                "operationId": "1276d4c90471d6a69ba9f96775f6819c",
                 "parameters": [
                     {
                         "name": "id",
@@ -1046,21 +1030,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthenticated"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
                     "404": {
-                        "description": "Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/MessageResponse"
-                                }
-                            }
-                        }
+                        "description": "Not Found"
                     }
                 },
                 "security": [
@@ -1076,7 +1047,6 @@
                     "Parameters"
                 ],
                 "summary": "Importuj CSV z plików",
-                "description": "Importuje dania za pomocą CSV",
                 "operationId": "475884bce5383ada696bfc527e956740",
                 "requestBody": {
                     "required": true,
@@ -1088,19 +1058,21 @@
                                 ],
                                 "properties": {
                                     "file": {
-                                        "description": "Plik CSV (nagłówki: id,name,type,value, isActive)",
                                         "type": "string",
                                         "format": "binary"
                                     },
                                     "delimiter": {
-                                        "description": "Dozwolone: comma(,), semicolon(;), pipe(|), tab(\\\\t). Default: comma",
                                         "type": "string",
                                         "default": "comma",
                                         "enum": [
                                             "comma",
                                             "semicolon",
                                             "pipe",
-                                            "tab"
+                                            "tab",
+                                            ",",
+                                            ";",
+                                            "|",
+                                            "\\t"
                                         ]
                                     }
                                 },
@@ -1121,7 +1093,7 @@
                         }
                     },
                     "422": {
-                        "description": "Bad data (validation or invalid CSV)",
+                        "description": "Bad data",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1129,12 +1101,6 @@
                                 }
                             }
                         }
-                    },
-                    "401": {
-                        "description": "Unauthenticated"
-                    },
-                    "403": {
-                        "description": "Forbidden"
                     }
                 },
                 "security": [
@@ -1149,14 +1115,14 @@
                 "tags": [
                     "Recommendations"
                 ],
-                "summary": "Rekomendacje dla użytkownika",
-                "description": "Zwraca paginowaną listę rekomendowanych dań z polem `match_score`.",
+                "summary": "User recommendations",
+                "description": "Returns a paginated list of recommended dishes for the authenticated user. Each item includes a `match_score` computed from user's parameter weights.",
                 "operationId": "recommendation",
                 "parameters": [
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Ilość na stronę (1–10, domyślnie 10)",
+                        "description": "Items per page (1–10, default 10)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -1168,7 +1134,7 @@
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Numer strony (>=1, domyślnie 1)",
+                        "description": "Page number (>= 1, default 1)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -1210,6 +1176,10 @@
                                                         "example": "spaghetti.jpg",
                                                         "nullable": true
                                                     },
+                                                    "is_vegan": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
                                                     "parameters": {
                                                         "type": "array",
                                                         "items": {
@@ -1223,14 +1193,17 @@
                                                                     "example": "Włoska"
                                                                 },
                                                                 "type": {
-                                                                    "type": "string",
-                                                                    "enum": [
-                                                                        "category",
-                                                                        "cuisine",
-                                                                        "flavour",
-                                                                        "other"
-                                                                    ],
-                                                                    "example": "cuisine"
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "integer",
+                                                                            "example": 2
+                                                                        },
+                                                                        "name": {
+                                                                            "type": "string",
+                                                                            "example": "cuisine"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
                                                                 }
                                                             },
                                                             "type": "object"
@@ -1295,7 +1268,6 @@
                                         },
                                         "prev_page_url": {
                                             "type": "string",
-                                            "example": null,
                                             "nullable": true
                                         },
                                         "to": {
@@ -1329,14 +1301,14 @@
                 "tags": [
                     "Recommendations"
                 ],
-                "summary": "Pobierz dania przez id",
-                "description": "Zwraca listę dań, by udostępić ją.",
+                "summary": "Fetch dishes by IDs (public)",
+                "description": "Returns a list of dishes (with parameters and their types) for sharing. No authentication required.",
                 "operationId": "eda58ece0c9f68d21fd2b19952c09257",
                 "parameters": [
                     {
                         "name": "ids",
                         "in": "query",
-                        "description": "Oddzielone przecinkiem id dań",
+                        "description": "Comma-separated dish IDs",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1371,6 +1343,10 @@
                                                 "example": "spaghetti.jpg",
                                                 "nullable": true
                                             },
+                                            "is_vegan": {
+                                                "type": "boolean",
+                                                "example": false
+                                            },
                                             "parameters": {
                                                 "type": "array",
                                                 "items": {
@@ -1384,23 +1360,17 @@
                                                             "example": "Włoska"
                                                         },
                                                         "type": {
-                                                            "type": "string",
-                                                            "enum": [
-                                                                "category",
-                                                                "cuisine",
-                                                                "flavour",
-                                                                "other"
-                                                            ],
-                                                            "example": "cuisine"
-                                                        },
-                                                        "value": {
-                                                            "type": "number",
-                                                            "format": "float",
-                                                            "example": 1
-                                                        },
-                                                        "is_active": {
-                                                            "type": "boolean",
-                                                            "example": true
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 2
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "cuisine"
+                                                                }
+                                                            },
+                                                            "type": "object"
                                                         }
                                                     },
                                                     "type": "object"
@@ -1432,14 +1402,14 @@
                 "tags": [
                     "Swipes"
                 ],
-                "summary": "Pobierz karty do swipe’owania (nieswipe’owane dania z przypiętymi parametrami)",
-                "description": "Zwraca losową listę nieswipe’owanych dań aktualnego użytkownika wraz z ich parametrami",
+                "summary": "Get swipeable cards (unswiped dishes with attached parameters)",
+                "description": "Returns a random list of the current user's unswiped dishes together with their parameters.",
                 "operationId": "bc06d8eb51e2659b92e2f932a862e578",
                 "parameters": [
                     {
                         "name": "limit",
                         "in": "query",
-                        "description": "Ile kart zwrócić (1–10, domyślnie 5)",
+                        "description": "How many cards to return (1–10, default 5)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -1451,7 +1421,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lista dań",
+                        "description": "List of dishes",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1468,7 +1438,7 @@
                                             },
                                             "description": {
                                                 "type": "string",
-                                                "example": "Klasyczny makaron z sosem pomidorowo-mięsnym.",
+                                                "example": "Classic beef & tomato ragù.",
                                                 "nullable": true
                                             },
                                             "image_url": {
@@ -1478,10 +1448,10 @@
                                             },
                                             "is_vegan": {
                                                 "type": "boolean",
-                                                "example": true
+                                                "example": false
                                             },
                                             "parameters": {
-                                                "description": "Parametry przypięte do dania (wiele↔wiele).",
+                                                "description": "Dish parameters (many-to-many).",
                                                 "type": "array",
                                                 "items": {
                                                     "properties": {
@@ -1491,17 +1461,20 @@
                                                         },
                                                         "name": {
                                                             "type": "string",
-                                                            "example": "Włoska"
+                                                            "example": "Italian"
                                                         },
                                                         "type": {
-                                                            "type": "string",
-                                                            "enum": [
-                                                                "category",
-                                                                "cuisine",
-                                                                "flavour",
-                                                                "other"
-                                                            ],
-                                                            "example": "cuisine"
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 2
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "cuisine"
+                                                                }
+                                                            },
+                                                            "type": "object"
                                                         },
                                                         "value": {
                                                             "type": "number",
@@ -1549,15 +1522,25 @@
                 "tags": [
                     "Swipes"
                 ],
-                "summary": "Pobierz karty do swipe’owania (nieswipe’owane dania z przypiętymi parametrami) według parametru.",
-                "description": "Zwraca losową listę nieswipe’owanych dań aktualnego użytkownika wraz z ich parametrami, według parametru.",
+                "summary": "Get swipeable cards filtered by a parameter",
+                "description": "Returns a random list of the current user's unswiped dishes that contain the given parameter.",
                 "operationId": "861a3e36b9c2b61be4d88cb334cf36f0",
                 "parameters": [
                     {
                         "name": "id",
-                        "in": "query",
-                        "description": "Id parametru",
+                        "in": "path",
+                        "description": "Parameter ID",
                         "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "How many cards to return (1–10, default 5)",
+                        "required": false,
                         "schema": {
                             "type": "integer",
                             "default": 5,
@@ -1568,7 +1551,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lista dań",
+                        "description": "List of dishes",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1581,16 +1564,14 @@
                                             },
                                             "name": {
                                                 "type": "string",
-                                                "example": "Spaghetti Bolognese"
+                                                "example": "Vegan Pad Thai"
                                             },
                                             "description": {
                                                 "type": "string",
-                                                "example": "Klasyczny makaron z sosem pomidorowo-mięsnym.",
                                                 "nullable": true
                                             },
                                             "image_url": {
                                                 "type": "string",
-                                                "example": "spaghetti.jpg",
                                                 "nullable": true
                                             },
                                             "is_vegan": {
@@ -1598,27 +1579,29 @@
                                                 "example": true
                                             },
                                             "parameters": {
-                                                "description": "Parametry przypięte do dania (wiele↔wiele).",
                                                 "type": "array",
                                                 "items": {
                                                     "properties": {
                                                         "id": {
                                                             "type": "integer",
-                                                            "example": 12
+                                                            "example": 44
                                                         },
                                                         "name": {
                                                             "type": "string",
-                                                            "example": "Włoska"
+                                                            "example": "Thai"
                                                         },
                                                         "type": {
-                                                            "type": "string",
-                                                            "enum": [
-                                                                "category",
-                                                                "cuisine",
-                                                                "flavour",
-                                                                "other"
-                                                            ],
-                                                            "example": "cuisine"
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 2
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "cuisine"
+                                                                }
+                                                            },
+                                                            "type": "object"
                                                         },
                                                         "value": {
                                                             "type": "number",
@@ -1635,13 +1618,11 @@
                                             },
                                             "created_at": {
                                                 "type": "string",
-                                                "format": "date-time",
-                                                "example": "2025-10-08T12:34:56Z"
+                                                "format": "date-time"
                                             },
                                             "updated_at": {
                                                 "type": "string",
-                                                "format": "date-time",
-                                                "example": "2025-10-08T12:34:56Z"
+                                                "format": "date-time"
                                             }
                                         },
                                         "type": "object"
@@ -1666,8 +1647,8 @@
                 "tags": [
                     "Swipes"
                 ],
-                "summary": "Zapisz decyzję swipe (like/dislike) i zaktualizuj wagi parametrów",
-                "description": "Aktualizuje wagi użytkownika (ParameterWeight) dla wszystkich parametrów przypiętych do dania. Dodatkowo zapisuje swipe (pivot swipes).",
+                "summary": "Save swipe decision (like/dislike) and update parameter weights",
+                "description": "Updates the user's ParameterWeight for all parameters attached to the dish. Also records the swipe.",
                 "operationId": "79222349d0339c05122302c69982cf4e",
                 "requestBody": {
                     "required": true,
@@ -1699,7 +1680,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Zapisano",
+                        "description": "Saved",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1715,7 +1696,7 @@
                         }
                     },
                     "404": {
-                        "description": "Nie znaleziono dania",
+                        "description": "Dish not found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1731,7 +1712,7 @@
                         }
                     },
                     "422": {
-                        "description": "Błąd walidacji",
+                        "description": "Validation error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1764,29 +1745,258 @@
                     }
                 ]
             }
+        },
+        "/api/types": {
+            "get": {
+                "tags": [
+                    "Types"
+                ],
+                "summary": "List types (paginated)",
+                "operationId": "5ae5a6ccb7da5e1410da3b56b6fde09f",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (1–100; default 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedTypes"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Types"
+                ],
+                "summary": "Create a new type",
+                "operationId": "6215f40499a4b69db488634fcb4ed0b4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "flavour"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Type"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/types/{id}": {
+            "get": {
+                "tags": [
+                    "Types"
+                ],
+                "summary": "Get single type",
+                "operationId": "6bd0b47f25aa9325d8aa96c18ec401a3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Type"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Types"
+                ],
+                "summary": "Update a type",
+                "operationId": "4f384bc0a685f6a6c172bce5ad7fb6dd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "category"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Type"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Types"
+                ],
+                "summary": "Delete a type",
+                "operationId": "103812d7190b22f2d47edcb4cf7322f3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "409": {
+                        "description": "Conflict (type has parameters)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
         "schemas": {
             "Parameter": {
+                "description": "Parametr dania z odwołaniem do typu",
+                "required": [
+                    "id",
+                    "name",
+                    "type_id",
+                    "value",
+                    "is_active"
+                ],
                 "properties": {
                     "id": {
                         "type": "integer",
-                        "example": 12
+                        "example": 1
                     },
                     "name": {
                         "type": "string",
                         "example": "Włoska"
                     },
-                    "type": {
-                        "type": "string",
-                        "enum": [
-                            "category",
-                            "cuisine",
-                            "flavour",
-                            "other"
-                        ],
-                        "example": "cuisine"
+                    "type_id": {
+                        "description": "FK do tabeli types",
+                        "type": "integer",
+                        "example": 2
                     },
                     "value": {
                         "type": "number",
@@ -1799,16 +2009,53 @@
                     },
                     "created_at": {
                         "type": "string",
-                        "format": "date-time"
+                        "format": "date-time",
+                        "nullable": true
                     },
                     "updated_at": {
                         "type": "string",
-                        "format": "date-time"
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "type": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/Type"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "Zagnieżdżony obiekt typu (jeśli został załadowany eager-loadem)"
+                    },
+                    "type_name": {
+                        "description": "Wygodny alias na type.name (opcjonalny, jeśli go wystawiasz)",
+                        "type": "string",
+                        "example": "cuisine",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PaginationLink": {
+                "description": "Element paginacji Laravela",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "example": "http://localhost/api/parameter?page=2",
+                        "nullable": true
+                    },
+                    "label": {
+                        "type": "string",
+                        "example": "2"
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "example": false
                     }
                 },
                 "type": "object"
             },
             "PaginatedParameters": {
+                "description": "Strona wyników z listą parametrów",
                 "properties": {
                     "current_page": {
                         "type": "integer",
@@ -1822,7 +2069,7 @@
                     },
                     "first_page_url": {
                         "type": "string",
-                        "example": "http://localhost/api/parameters?page=1"
+                        "example": "http://localhost/api/parameter?page=1"
                     },
                     "from": {
                         "type": "integer",
@@ -1831,11 +2078,102 @@
                     },
                     "last_page": {
                         "type": "integer",
-                        "example": 3
+                        "example": 5
                     },
                     "last_page_url": {
                         "type": "string",
-                        "example": "http://localhost/api/parameters?page=3"
+                        "example": "http://localhost/api/parameter?page=5"
+                    },
+                    "links": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PaginationLink"
+                        }
+                    },
+                    "next_page_url": {
+                        "type": "string",
+                        "example": "http://localhost/api/parameter?page=2",
+                        "nullable": true
+                    },
+                    "path": {
+                        "type": "string",
+                        "example": "http://localhost/api/parameter"
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "prev_page_url": {
+                        "type": "string",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "to": {
+                        "type": "integer",
+                        "example": 10,
+                        "nullable": true
+                    },
+                    "total": {
+                        "type": "integer",
+                        "example": 47
+                    }
+                },
+                "type": "object"
+            },
+            "Type": {
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "cuisine"
+                    },
+                    "parameters_count": {
+                        "type": "integer",
+                        "example": 7,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "PaginatedTypes": {
+                "properties": {
+                    "current_page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Type"
+                        }
+                    },
+                    "first_page_url": {
+                        "type": "string"
+                    },
+                    "from": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "last_page": {
+                        "type": "integer"
+                    },
+                    "last_page_url": {
+                        "type": "string"
                     },
                     "links": {
                         "type": "array",
@@ -1860,8 +2198,7 @@
                         "nullable": true
                     },
                     "path": {
-                        "type": "string",
-                        "example": "http://localhost/api/parameters"
+                        "type": "string"
                     },
                     "per_page": {
                         "type": "integer",
@@ -1873,12 +2210,10 @@
                     },
                     "to": {
                         "type": "integer",
-                        "example": 10,
                         "nullable": true
                     },
                     "total": {
-                        "type": "integer",
-                        "example": 25
+                        "type": "integer"
                     }
                 },
                 "type": "object"
@@ -2184,6 +2519,10 @@
         {
             "name": "Recommendations",
             "description": "Recommendations"
+        },
+        {
+            "name": "Types",
+            "description": "Types"
         }
     ]
 }
