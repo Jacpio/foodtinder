@@ -13,9 +13,10 @@ class VerifyEmailController extends Controller
 {
     /**
      * @OA\Get(
-     *   path="api/verify-email/{id}/{hash}",
+     *   path="/api/verify-email/{id}/{hash}",
      *   tags={"Auth"},
-     *   summary="Potwierdzenie adresu email",
+     *   summary="Verify email address",
+     *   description="Marks the authenticated user's email as verified.",
      *   security={{"bearerAuth": {}}},
      *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *   @OA\Parameter(name="hash", in="path", required=true, @OA\Schema(type="string")),
@@ -24,7 +25,6 @@ class VerifyEmailController extends Controller
      *   @OA\Response(response=401, description="Unauthenticated")
      * )
      */
-
     public function __invoke(EmailVerificationRequest $request): JsonResponse
     {
         if ($request->user()->hasVerifiedEmail()) {

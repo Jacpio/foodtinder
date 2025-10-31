@@ -20,16 +20,16 @@ class DishController extends Controller
      *   path="/api/dish",
      *   tags={"Dishes"},
      *   security={{"bearerAuth": {}}},
-     *   summary="Lista potraw (z parametrami)",
-     *   description="Zwraca paginowaną listę dań z przypiętymi parametrami.",
+     *   summary="List dishes (with parameters)",
+     *   description="Returns a paginated list of dishes with their attached parameters.",
      *   @OA\Parameter(
      *     name="per_page", in="query", required=false,
-     *     description="Paginacja (1–100, domyślnie 10)",
+     *     description="Pagination size (1–100, default 10)",
      *     @OA\Schema(type="integer", minimum=1, maximum=100, default=10)
      *   ),
      *   @OA\Response(
      *     response=200,
-     *     description="Paginowana lista dań",
+     *     description="Paginated list of dishes",
      *     @OA\JsonContent(
      *       type="object",
      *       @OA\Property(
@@ -48,7 +48,7 @@ class DishController extends Controller
      *             @OA\Items(
      *               type="object",
      *               @OA\Property(property="id", type="integer", example=12),
-     *               @OA\Property(property="name", type="string", example="Włoska"),
+     *               @OA\Property(property="name", type="string", example="Italian"),
      *               @OA\Property(property="type_id", type="integer", example=2),
      *               @OA\Property(property="value", type="number", format="float", example=1),
      *               @OA\Property(property="is_active", type="boolean", example=true)
@@ -70,7 +70,7 @@ class DishController extends Controller
             ]);
             $perPage = (int)($validated['per_page'] ?? 10);
 
-            // Nie ładujemy relacji 'type', testy oczekują tylko type_id.
+            // Tests expect only type_id on parameters (no nested type relation here).
             $page = Dish::with('parameters')->paginate($perPage);
 
             return response()->json($page);
@@ -84,7 +84,7 @@ class DishController extends Controller
      *   path="/api/dish/{id}",
      *   tags={"Dishes"},
      *   security={{"bearerAuth": {}}},
-     *   summary="Pokaż jedną potrawę (z parametrami)",
+     *   summary="Show a single dish (with parameters)",
      *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *   @OA\Response(
      *     response=200,
@@ -102,7 +102,7 @@ class DishController extends Controller
      *         @OA\Items(
      *           type="object",
      *           @OA\Property(property="id", type="integer", example=12),
-     *           @OA\Property(property="name", type="string", example="Włoska"),
+     *           @OA\Property(property="name", type="string", example="Italian"),
      *           @OA\Property(property="type_id", type="integer", example=2),
      *           @OA\Property(property="value", type="number", format="float", example=1),
      *           @OA\Property(property="is_active", type="boolean", example=true)
@@ -128,23 +128,23 @@ class DishController extends Controller
      * @OA\Post(
      *   path="/api/dish",
      *   tags={"Dishes"},
-     *   summary="Utwórz nową potrawę",
+     *   summary="Create a new dish",
      *   security={{"bearerAuth": {}}},
      *   @OA\RequestBody(
      *     required=true,
-     *     description="Wspiera JSON oraz multipart/form-data. Dołącz `parameter_ids[]` aby przypiąć parametry.",
+     *     description="Supports JSON and multipart/form-data. Include `parameter_ids[]` to attach parameters.",
      *     @OA\MediaType(
      *       mediaType="application/json",
      *       @OA\Schema(
      *         required={"name"},
      *         @OA\Property(property="name", type="string", example="Pizza Margherita"),
-     *         @OA\Property(property="description", type="string", nullable=true, example="Klasyk"),
+     *         @OA\Property(property="description", type="string", nullable=true, example="Classic"),
      *         @OA\Property(property="is_vegan", type="boolean", example=false),
      *         @OA\Property(
      *           property="parameter_ids",
      *           type="array",
      *           @OA\Items(type="integer", example=1),
-     *           description="ID parametrów do przypięcia"
+     *           description="IDs of parameters to attach"
      *         )
      *       )
      *     ),
@@ -153,24 +153,24 @@ class DishController extends Controller
      *       @OA\Schema(
      *         required={"name"},
      *         @OA\Property(property="name", type="string", example="Pizza Margherita"),
-     *         @OA\Property(property="description", type="string", nullable=true, example="Klasyk"),
+     *         @OA\Property(property="description", type="string", nullable=true, example="Classic"),
      *         @OA\Property(property="is_vegan", type="boolean", example=false),
      *         @OA\Property(
      *           property="parameter_ids[]",
      *           type="array",
      *           @OA\Items(type="integer", example=1),
-     *           description="ID parametrów do przypięcia"
+     *           description="IDs of parameters to attach"
      *         ),
      *         @OA\Property(
      *           property="image", type="string", format="binary", nullable=true,
-     *           description="Obrazek (opcjonalnie). Zapis w dysku 'public'."
+     *           description="Optional image. Stored on the 'public' disk."
      *         )
      *       )
      *     )
      *   ),
      *   @OA\Response(
      *     response=201,
-     *     description="Utworzono",
+     *     description="Created",
      *     @OA\JsonContent(
      *       type="object",
      *       @OA\Property(property="id", type="integer", example=101),
@@ -227,12 +227,12 @@ class DishController extends Controller
      * @OA\Put(
      *   path="/api/dish/{id}",
      *   tags={"Dishes"},
-     *   summary="Zaktualizuj potrawę",
+     *   summary="Update a dish",
      *   security={{"bearerAuth": {}}},
      *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *   @OA\RequestBody(
      *     required=false,
-     *     description="Wspiera JSON oraz multipart/form-data. Użyj `parameter_ids` aby podmienić przypięte parametry.",
+     *     description="Supports JSON and multipart/form-data. Use `parameter_ids` to replace attached parameters.",
      *     @OA\MediaType(
      *       mediaType="application/json",
      *       @OA\Schema(
@@ -244,7 +244,7 @@ class DishController extends Controller
      *           property="parameter_ids",
      *           type="array",
      *           @OA\Items(type="integer"),
-     *           description="Zestaw parametrów do zsynchronizowania (nadpisuje poprzednie)"
+     *           description="Set of parameter IDs to sync (overwrites previous)"
      *         )
      *       )
      *     ),
@@ -259,7 +259,7 @@ class DishController extends Controller
      *           property="parameter_ids[]",
      *           type="array",
      *           @OA\Items(type="integer"),
-     *           description="Zestaw parametrów do zsynchronizowania (nadpisuje poprzednie)"
+     *           description="Set of parameter IDs to sync (overwrites previous)"
      *         ),
      *         @OA\Property(property="image", type="string", format="binary", nullable=true)
      *       )
@@ -321,7 +321,7 @@ class DishController extends Controller
      * @OA\Delete(
      *   path="/api/dish/{id}",
      *   tags={"Dishes"},
-     *   summary="Usuń potrawę",
+     *   summary="Delete a dish",
      *   security={{"bearerAuth": {}}},
      *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *   @OA\Response(
@@ -364,8 +364,8 @@ class DishController extends Controller
      * @OA\Post(
      *   path="/api/dish/import-csv",
      *   tags={"Dishes"},
-     *   summary="Importuj CSV z plików",
-     *   description="Importuje dania za pomocą CSV",
+     *   summary="Import dishes from CSV",
+     *   description="Imports dishes from a CSV file.",
      *   security={{"bearerAuth": {}}},
      *   @OA\RequestBody(
      *     required=true,
@@ -378,12 +378,12 @@ class DishController extends Controller
      *           property="file",
      *           type="string",
      *           format="binary",
-     *           description="Plik CSV (nagłówki: id,name,image_url,description,is_vegan)"
+     *           description="CSV file (headers: id,name,image_url,description,is_vegan)"
      *         ),
      *         @OA\Property(
      *           property="delimiter",
      *           type="string",
-     *           description="Dozwolone: comma(,), semicolon(;), pipe(|), tab(\\t). Default: comma",
+     *           description="Allowed: comma(,), semicolon(;), pipe(|), tab(\\t). Default: comma",
      *           enum={"comma","semicolon","pipe","tab"},
      *           default="comma"
      *         )

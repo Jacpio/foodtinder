@@ -17,18 +17,22 @@ class NewPasswordController extends Controller
 {
     /**
      * @OA\Post(
-     *   path="api/reset-password",
+     *   path="/api/reset-password",
      *   tags={"Auth"},
-     *   summary="Ustaw nowe hasło",
+     *   summary="Set a new password",
+     *   description="Resets the password using a valid reset token.",
      *   @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/ResetPasswordRequest")),
-     *   @OA\Response(response=200, description="OK", @OA\JsonContent(ref="#/components/schemas/StatusResponse")),
-     *   @OA.Response(response=422, description="Validation error", @OA\JsonContent(ref="#/components/schemas/ValidationError"))
+     *   @OA\Response(
+     *     response=200,
+     *     description="OK",
+     *     @OA\JsonContent(ref="#/components/schemas/StatusResponse")
+     *   ),
+     *   @OA\Response(
+     *     response=422,
+     *     description="Validation error",
+     *     @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *   )
      * )
-     */
-    /**
-     * Handle an incoming new password request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): JsonResponse
     {

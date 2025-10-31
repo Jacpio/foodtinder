@@ -16,12 +16,14 @@ class HomeController extends Controller
      *   path="/api/get-the-most-popular-parameters",
      *   operationId="getMostPopularParametersLinks",
      *   tags={"Swipes"},
-     *   summary="Linki do najczęściej lubianych parametrów użytkownika",
-     *   description="Zwraca tablicę URL-i do endpointu zwracającego karty po parametrze.",
+     *   summary="Links to the user's most liked parameters",
+     *   description="Returns an array of URLs pointing to the endpoint that serves swipe cards filtered by a parameter.",
      *   security={{"bearerAuth": {}}},
      *   @OA\Parameter(
-     *     name="limit", in="query", required=false,
-     *     description="Ile linków zwrócić (1–50, domyślnie 6)",
+     *     name="limit",
+     *     in="query",
+     *     required=false,
+     *     description="How many links to return (1–50, default 6)",
      *     @OA\Schema(type="integer", minimum=1, maximum=50, default=6)
      *   ),
      *   @OA\Response(
@@ -29,12 +31,17 @@ class HomeController extends Controller
      *     description="OK",
      *     @OA\JsonContent(
      *       type="array",
-     *       @OA\Items(type="string", format="uri", example="http://127.0.0.1:8000/api/swipe-cards-by-parameter/14")
+     *       @OA\Items(
+     *         type="string",
+     *         format="uri",
+     *         example="http://localhost:8000/api/swipe-cards-by-parameter/14"
+     *       )
      *     )
      *   ),
      *   @OA\Response(response=401, description="Unauthenticated")
      * )
      */
+
     public function getParameterSwipe(Request $request): JsonResponse
     {
         $data = $request->validate([

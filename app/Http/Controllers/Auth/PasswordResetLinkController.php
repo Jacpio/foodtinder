@@ -13,18 +13,22 @@ class PasswordResetLinkController extends Controller
 {
     /**
      * @OA\Post(
-     *   path="api/forgot-password",
+     *   path="/api/forgot-password",
      *   tags={"Auth"},
-     *   summary="Wyślij link resetu hasła",
+     *   summary="Send password reset link",
+     *   description="Sends a password reset link to the specified email address.",
      *   @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/EmailOnlyRequest")),
-     *   @OA\Response(response=200, description="OK", @OA\JsonContent(ref="#/components/schemas/StatusResponse")),
-     *   @OA\Response(response=422, description="Validation error", @OA\JsonContent(ref="#/components/schemas/ValidationError"))
+     *   @OA\Response(
+     *     response=200,
+     *     description="OK",
+     *     @OA\JsonContent(ref="#/components/schemas/StatusResponse")
+     *   ),
+     *   @OA\Response(
+     *     response=422,
+     *     description="Validation error",
+     *     @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *   )
      * )
-     */
-    /**
-     * Handle an incoming password reset link request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): JsonResponse
     {

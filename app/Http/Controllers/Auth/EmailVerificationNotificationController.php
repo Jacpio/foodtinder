@@ -12,16 +12,18 @@ class EmailVerificationNotificationController extends Controller
 {
     /**
      * @OA\Post(
-     *   path="api/email/verification-notification",
+     *   path="/api/email/verification-notification",
      *   tags={"Auth"},
-     *   summary="Wyślij ponownie mail weryfikacyjny",
+     *   summary="Resend verification email",
+     *   description="Sends a new email verification link to the authenticated user.",
      *   security={{"bearerAuth": {}}},
-     *   @OA\Response(response=200, description="OK", @OA\JsonContent(ref="#/components/schemas/StatusResponse")),
+     *   @OA\Response(
+     *     response=200,
+     *     description="OK",
+     *     @OA\JsonContent(ref="#/components/schemas/StatusResponse")
+     *   ),
      *   @OA\Response(response=401, description="Unauthenticated")
      * )
-     */
-    /**
-     * Send a new email verification notification.
      */
     public function store(Request $request): JsonResponse|RedirectResponse
     {

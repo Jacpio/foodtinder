@@ -15,14 +15,12 @@ class AuthenticatedSessionController extends Controller
     /**
      * @OA\Post(
      *   path="/api/login",
-     *   summary="Logowanie",
      *   tags={"Auth"},
+     *   summary="Login",
+     *   description="Authenticates the user and returns an API token.",
      *   @OA\RequestBody(
      *     required=true,
-     *     @OA\JsonContent(
-     *      type="array",
-     *      @OA\Items(ref="#/components/schemas/LoginRequest")
-     * )
+     *     @OA\JsonContent(ref="#/components/schemas/LoginRequest")
      *   ),
      *   @OA\Response(
      *     response=200,
@@ -31,9 +29,9 @@ class AuthenticatedSessionController extends Controller
      *   ),
      *   @OA\Response(
      *     response=422,
-     *     description="Validation Error",
+     *     description="Validation error",
      *     @OA\JsonContent(ref="#/components/schemas/ValidationError")
-     *    )
+     *   )
      * )
      */
     public function store(LoginRequest $request): JsonResponse
@@ -52,9 +50,14 @@ class AuthenticatedSessionController extends Controller
      * @OA\Post(
      *   path="/api/logout",
      *   tags={"Auth"},
-     *   summary="Wylogowanie",
+     *   summary="Logout",
+     *   description="Revokes the current access token.",
      *   security={{"bearerAuth": {}}},
-     *   @OA\Response(response=200, description="OK", @OA\JsonContent(ref="#/components/schemas/MessageResponse")),
+     *   @OA\Response(
+     *     response=200,
+     *     description="OK",
+     *     @OA\JsonContent(ref="#/components/schemas/MessageResponse")
+     *   ),
      *   @OA\Response(response=401, description="Unauthenticated")
      * )
      */

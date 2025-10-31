@@ -17,17 +17,15 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Logowanie",
+                "summary": "Login",
+                "description": "Authenticates the user and returns an API token.",
                 "operationId": "bc76a9d52929cab7a147ca7b5c527430",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/LoginRequest"
-                                }
+                                "$ref": "#/components/schemas/LoginRequest"
                             }
                         }
                     }
@@ -44,7 +42,7 @@
                         }
                     },
                     "422": {
-                        "description": "Validation Error",
+                        "description": "Validation error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -61,7 +59,8 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Wylogowanie",
+                "summary": "Logout",
+                "description": "Revokes the current access token.",
                 "operationId": "0ab4e3cf7bc4f7ec81b48f7928c7de7c",
                 "responses": {
                     "200": {
@@ -85,13 +84,170 @@
                 ]
             }
         },
-        "api/verify-email/{id}/{hash}": {
+        "/api/email/verification-notification": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Resend verification email",
+                "description": "Sends a new email verification link to the authenticated user.",
+                "operationId": "21ff3f9f9b9e1407909089f864312e1c",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StatusResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reset-password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Set a new password",
+                "description": "Resets the password using a valid reset token.",
+                "operationId": "28566bf52aa8f35c19b304b2c2be3829",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResetPasswordRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StatusResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/forgot-password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Send password reset link",
+                "description": "Sends a password reset link to the specified email address.",
+                "operationId": "e6a36e6e48542536284f7f26f6cc4d7f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailOnlyRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StatusResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "User registration",
+                "description": "Registers a new user and returns an API token.",
+                "operationId": "18235ea6963e661c49bf381065779d6a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthTokenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/verify-email/{id}/{hash}": {
             "get": {
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Potwierdzenie adresu email",
-                "operationId": "36da40610f39b3888902c5a1b2010396",
+                "summary": "Verify email address",
+                "description": "Marks the authenticated user's email as verified.",
+                "operationId": "2a87bcc29fb717d6dd51a631c1b13064",
                 "parameters": [
                     {
                         "name": "id",
@@ -133,14 +289,14 @@
                 "tags": [
                     "Dishes"
                 ],
-                "summary": "Lista potraw (z parametrami)",
-                "description": "Zwraca paginowaną listę dań z przypiętymi parametrami.",
+                "summary": "List dishes (with parameters)",
+                "description": "Returns a paginated list of dishes with their attached parameters.",
                 "operationId": "c6ed095fc9c3a40a7aea0299cb01f933",
                 "parameters": [
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Paginacja (1–100, domyślnie 10)",
+                        "description": "Pagination size (1–100, default 10)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -152,7 +308,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Paginowana lista dań",
+                        "description": "Paginated list of dishes",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -192,7 +348,7 @@
                                                                 },
                                                                 "name": {
                                                                     "type": "string",
-                                                                    "example": "Włoska"
+                                                                    "example": "Italian"
                                                                 },
                                                                 "type_id": {
                                                                     "type": "integer",
@@ -240,10 +396,10 @@
                 "tags": [
                     "Dishes"
                 ],
-                "summary": "Utwórz nową potrawę",
+                "summary": "Create a new dish",
                 "operationId": "e7d341cf37c275d1fb731b5f22e4b3a6",
                 "requestBody": {
-                    "description": "Wspiera JSON oraz multipart/form-data. Dołącz `parameter_ids[]` aby przypiąć parametry.",
+                    "description": "Supports JSON and multipart/form-data. Include `parameter_ids[]` to attach parameters.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -258,7 +414,7 @@
                                     },
                                     "description": {
                                         "type": "string",
-                                        "example": "Klasyk",
+                                        "example": "Classic",
                                         "nullable": true
                                     },
                                     "is_vegan": {
@@ -266,7 +422,7 @@
                                         "example": false
                                     },
                                     "parameter_ids": {
-                                        "description": "ID parametrów do przypięcia",
+                                        "description": "IDs of parameters to attach",
                                         "type": "array",
                                         "items": {
                                             "type": "integer",
@@ -289,7 +445,7 @@
                                     },
                                     "description": {
                                         "type": "string",
-                                        "example": "Klasyk",
+                                        "example": "Classic",
                                         "nullable": true
                                     },
                                     "is_vegan": {
@@ -297,7 +453,7 @@
                                         "example": false
                                     },
                                     "parameter_ids[]": {
-                                        "description": "ID parametrów do przypięcia",
+                                        "description": "IDs of parameters to attach",
                                         "type": "array",
                                         "items": {
                                             "type": "integer",
@@ -305,7 +461,7 @@
                                         }
                                     },
                                     "image": {
-                                        "description": "Obrazek (opcjonalnie). Zapis w dysku 'public'.",
+                                        "description": "Optional image. Stored on the 'public' disk.",
                                         "type": "string",
                                         "format": "binary",
                                         "nullable": true
@@ -318,7 +474,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Utworzono",
+                        "description": "Created",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -385,7 +541,7 @@
                 "tags": [
                     "Dishes"
                 ],
-                "summary": "Pokaż jedną potrawę (z parametrami)",
+                "summary": "Show a single dish (with parameters)",
                 "operationId": "8752c0b427722e03594f2e46435c63bf",
                 "parameters": [
                     {
@@ -435,7 +591,7 @@
                                                     },
                                                     "name": {
                                                         "type": "string",
-                                                        "example": "Włoska"
+                                                        "example": "Italian"
                                                     },
                                                     "type_id": {
                                                         "type": "integer",
@@ -482,7 +638,7 @@
                 "tags": [
                     "Dishes"
                 ],
-                "summary": "Zaktualizuj potrawę",
+                "summary": "Update a dish",
                 "operationId": "429651375416801d92426feb5838bd41",
                 "parameters": [
                     {
@@ -495,7 +651,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Wspiera JSON oraz multipart/form-data. Użyj `parameter_ids` aby podmienić przypięte parametry.",
+                    "description": "Supports JSON and multipart/form-data. Use `parameter_ids` to replace attached parameters.",
                     "required": false,
                     "content": {
                         "application/json": {
@@ -517,7 +673,7 @@
                                         "example": false
                                     },
                                     "parameter_ids": {
-                                        "description": "Zestaw parametrów do zsynchronizowania (nadpisuje poprzednie)",
+                                        "description": "Set of parameter IDs to sync (overwrites previous)",
                                         "type": "array",
                                         "items": {
                                             "type": "integer"
@@ -546,7 +702,7 @@
                                         "example": false
                                     },
                                     "parameter_ids[]": {
-                                        "description": "Zestaw parametrów do zsynchronizowania (nadpisuje poprzednie)",
+                                        "description": "Set of parameter IDs to sync (overwrites previous)",
                                         "type": "array",
                                         "items": {
                                             "type": "integer"
@@ -587,7 +743,7 @@
                 "tags": [
                     "Dishes"
                 ],
-                "summary": "Usuń potrawę",
+                "summary": "Delete a dish",
                 "operationId": "21511d45f72d655fc0fe476e88160584",
                 "parameters": [
                     {
@@ -635,8 +791,8 @@
                 "tags": [
                     "Dishes"
                 ],
-                "summary": "Importuj CSV z plików",
-                "description": "Importuje dania za pomocą CSV",
+                "summary": "Import dishes from CSV",
+                "description": "Imports dishes from a CSV file.",
                 "operationId": "f7ae4c17471ee2106d40566ceb3b285f",
                 "requestBody": {
                     "required": true,
@@ -648,12 +804,12 @@
                                 ],
                                 "properties": {
                                     "file": {
-                                        "description": "Plik CSV (nagłówki: id,name,image_url,description,is_vegan)",
+                                        "description": "CSV file (headers: id,name,image_url,description,is_vegan)",
                                         "type": "string",
                                         "format": "binary"
                                     },
                                     "delimiter": {
-                                        "description": "Dozwolone: comma(,), semicolon(;), pipe(|), tab(\\\\t). Default: comma",
+                                        "description": "Allowed: comma(,), semicolon(;), pipe(|), tab(\\\\t). Default: comma",
                                         "type": "string",
                                         "default": "comma",
                                         "enum": [
@@ -709,14 +865,14 @@
                 "tags": [
                     "Swipes"
                 ],
-                "summary": "Linki do najczęściej lubianych parametrów użytkownika",
-                "description": "Zwraca tablicę URL-i do endpointu zwracającego karty po parametrze.",
+                "summary": "Links to the user's most liked parameters",
+                "description": "Returns an array of URLs pointing to the endpoint that serves swipe cards filtered by a parameter.",
                 "operationId": "getMostPopularParametersLinks",
                 "parameters": [
                     {
                         "name": "limit",
                         "in": "query",
-                        "description": "Ile linków zwrócić (1–50, domyślnie 6)",
+                        "description": "How many links to return (1–50, default 6)",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -736,7 +892,7 @@
                                     "items": {
                                         "type": "string",
                                         "format": "uri",
-                                        "example": "http://127.0.0.1:8000/api/swipe-cards-by-parameter/14"
+                                        "example": "http://localhost:8000/api/swipe-cards-by-parameter/14"
                                     }
                                 }
                             }

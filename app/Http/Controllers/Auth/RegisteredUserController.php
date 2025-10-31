@@ -17,16 +17,20 @@ class RegisteredUserController extends Controller
      * @OA\Post(
      *   path="/api/register",
      *   tags={"Auth"},
-     *   summary="Rejestracja użytkownika",
+     *   summary="User registration",
+     *   description="Registers a new user and returns an API token.",
      *   @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/RegisterRequest")),
-     *   @OA\Response(response=201, description="Created", @OA\JsonContent(ref="#/components/schemas/AuthTokenResponse")),
-     *   @OA\Response(response=422, description="Validation error", @OA\JsonContent(ref="#/components/schemas/ValidationError"))
+     *   @OA\Response(
+     *     response=201,
+     *     description="Created",
+     *     @OA\JsonContent(ref="#/components/schemas/AuthTokenResponse")
+     *   ),
+     *   @OA\Response(
+     *     response=422,
+     *     description="Validation error",
+     *     @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *   )
      * )
-     */
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): JsonResponse
     {
